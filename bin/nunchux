@@ -352,6 +352,9 @@ launch() {
     elif [[ "$name" == just:* || "$name" == npm:* ]]; then
         # Just recipes and npm scripts run in current pane
         tmux send-keys "$cmd" Enter
+    elif is_app_running "$name"; then
+        # App is running, switch to it
+        switch_to_app "$name"
     else
         open_popup "$name" "$cmd" "$width" "$height"
     fi
