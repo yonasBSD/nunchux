@@ -101,6 +101,27 @@ get_running_apps() {
     tmux list-windows -F '#{window_name}' 2>/dev/null || true
 }
 
+# Find justfile by searching upward from given directory
+find_justfile() {
+    local dir="$1"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -f "$dir/justfile" || -f "$dir/Justfile" || -f "$dir/.justfile" ]]; then
+            echo "$dir"
+            return 0
+        fi
+        dir=$(dirname "$dir")
+    done
+    return 1
+}
+
+# Get just recipes from a directory
+get_just_recipes() {
+    local dir="$1"
+    just --justfile "$dir/justfile" --summary 2>/dev/null || \
+    just --justfile "$dir/Justfile" --summary 2>/dev/null || \
+    just --justfile "$dir/.justfile" --summary 2>/dev/null || true
+}
+
 # Build the fzf menu entries
 build_menu() {
     local running_apps
@@ -135,6 +156,21 @@ build_menu() {
         # Format: visible_part \t name \t command \t width \t height
         printf "%s  %-12s  %s\t%s\t%s\t%s\t%s\n" "$icon" "$name" "$desc" "$name" "$cmd" "$width" "$height"
     done < <(load_apps)
+
+    # Add just recipes if justfile exists
+    local current_dir justfile_dir recipes
+    current_dir=$(get_current_dir)
+    if justfile_dir=$(find_justfile "$current_dir"); then
+        recipes=$(get_just_recipes "$justfile_dir")
+        if [[ -n "$recipes" ]]; then
+            # Divider
+            printf "   ─── just ───────────────────\t\t\t\t\t\n"
+            for recipe in $recipes; do
+                # Format: visible_part \t name \t command \t width \t height
+                printf "»  %-12s  %s\t%s\t%s\t%s\t%s\n" "$recipe" "" "just:$recipe" "cd $justfile_dir && just $recipe" "" ""
+            done
+        fi
+    fi
 }
 
 # Get current pane's working directory
@@ -221,8 +257,7 @@ launch() {
         --prompt="$FZF_PROMPT" \
         --pointer="$FZF_POINTER" \
         --layout=reverse \
-        --height=40% \
-        --min-height=8 \
+        --height=100% \
         --border="$FZF_BORDER" \
         --border-label="$FZF_BORDER_LABEL" \
         --border-label-pos=3 \
@@ -263,6 +298,9 @@ launch() {
         else
             open_app "$name" "$cmd"
         fi
+    elif [[ "$name" == just:* ]]; then
+        # Just recipes run in current pane
+        tmux send-keys "$cmd" Enter
     else
         open_popup "$name" "$cmd" "$width" "$height"
     fi
