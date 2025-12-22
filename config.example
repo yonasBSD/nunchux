@@ -53,6 +53,8 @@ status = n=$(docker ps -q 2>/dev/null | wc -l | tr -d ' '); [[ $n -gt 0 ]] && ec
 # status = ctx=$(kubectl config current-context 2>/dev/null); [[ -n "$ctx" ]] && echo "($ctx)"
 
 # [files]
+# # yazi doesn't work directly in tmux popups due to terminal passthrough issues.
+# # Workaround: wrap in nvim terminal. See https://github.com/sxyazi/yazi/issues/2308
 # cmd = nvim -c 'terminal yazi' -c 'startinsert' -c 'autocmd TermClose * qa!'
 # desc = File manager
 
