@@ -24,6 +24,9 @@ ICON_STOPPED="○"
 APP_POPUP_WIDTH="90%"
 APP_POPUP_HEIGHT="90%"
 
+# Justfile integration (set to false to disable)
+JUST_ENABLED=true
+
 # FZF styling
 FZF_PROMPT=" "
 FZF_POINTER="▶"
@@ -157,18 +160,20 @@ build_menu() {
         printf "%s  %-12s  %s\t%s\t%s\t%s\t%s\n" "$icon" "$name" "$desc" "$name" "$cmd" "$width" "$height"
     done < <(load_apps)
 
-    # Add just recipes if justfile exists
-    local current_dir justfile_dir recipes
-    current_dir=$(get_current_dir)
-    if justfile_dir=$(find_justfile "$current_dir"); then
-        recipes=$(get_just_recipes "$justfile_dir")
-        if [[ -n "$recipes" ]]; then
-            # Divider
-            printf "   ─── just ───────────────────\t\t\t\t\t\n"
-            for recipe in $recipes; do
-                # Format: visible_part \t name \t command \t width \t height
-                printf "»  %-12s  %s\t%s\t%s\t%s\t%s\n" "$recipe" "" "just:$recipe" "cd $justfile_dir && just $recipe" "" ""
-            done
+    # Add just recipes if justfile exists and enabled
+    if [[ "$JUST_ENABLED" == "true" ]]; then
+        local current_dir justfile_dir recipes
+        current_dir=$(get_current_dir)
+        if justfile_dir=$(find_justfile "$current_dir"); then
+            recipes=$(get_just_recipes "$justfile_dir")
+            if [[ -n "$recipes" ]]; then
+                # Divider
+                printf "   ─── just ───────────────────\t\t\t\t\t\n"
+                for recipe in $recipes; do
+                    # Format: visible_part \t name \t command \t width \t height
+                    printf "»  %-12s  %s\t%s\t%s\t%s\t%s\n" "$recipe" "" "just:$recipe" "cd $justfile_dir && just $recipe" "" ""
+                done
+            fi
         fi
     fi
 }
