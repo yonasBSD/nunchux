@@ -27,6 +27,9 @@ APP_POPUP_HEIGHT="90%"
 # Justfile integration (set to false to disable)
 JUST_ENABLED=true
 
+# package.json scripts integration (set to false to disable)
+NPM_ENABLED=true
+
 # FZF styling
 FZF_PROMPT=" "
 FZF_POINTER="▶"
@@ -125,6 +128,31 @@ get_just_recipes() {
     just --justfile "$dir/.justfile" --summary 2>/dev/null || true
 }
 
+# Find package.json by searching upward from given directory
+find_package_json() {
+    local dir="$1"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -f "$dir/package.json" ]]; then
+            echo "$dir"
+            return 0
+        fi
+        dir=$(dirname "$dir")
+    done
+    return 1
+}
+
+# Get npm scripts from a directory
+get_npm_scripts() {
+    local dir="$1"
+    if command -v jq &>/dev/null; then
+        jq -r '.scripts // {} | keys[]' "$dir/package.json" 2>/dev/null || true
+    else
+        # Fallback without jq - basic grep approach
+        grep -oP '(?<="scripts"\s*:\s*\{)[^}]*' "$dir/package.json" 2>/dev/null | \
+            grep -oP '"[^"]+"\s*:' | tr -d '":' | tr -s ' ' '\n' || true
+    fi
+}
+
 # Build the fzf menu entries
 build_menu() {
     local running_apps
@@ -173,6 +201,24 @@ build_menu() {
                     # Format: visible_part \t name \t command \t width \t height
                     printf "»  %-12s  %s\t%s\t%s\t%s\t%s\n" "$recipe" "" "just:$recipe" "cd $justfile_dir && just $recipe" "" ""
                 done
+            fi
+        fi
+    fi
+
+    # Add npm scripts if package.json exists and enabled
+    if [[ "$NPM_ENABLED" == "true" ]]; then
+        local current_dir pkg_dir scripts
+        current_dir=$(get_current_dir)
+        if pkg_dir=$(find_package_json "$current_dir"); then
+            scripts=$(get_npm_scripts "$pkg_dir")
+            if [[ -n "$scripts" ]]; then
+                # Divider
+                printf "   ─── npm ────────────────────\t\t\t\t\t\n"
+                while IFS= read -r script; do
+                    [[ -z "$script" ]] && continue
+                    # Format: visible_part \t name \t command \t width \t height
+                    printf "»  %-12s  %s\t%s\t%s\t%s\t%s\n" "$script" "" "npm:$script" "cd $pkg_dir && npm run $script" "" ""
+                done <<< "$scripts"
             fi
         fi
     fi
@@ -303,8 +349,8 @@ launch() {
         else
             open_app "$name" "$cmd"
         fi
-    elif [[ "$name" == just:* ]]; then
-        # Just recipes run in current pane
+    elif [[ "$name" == just:* || "$name" == npm:* ]]; then
+        # Just recipes and npm scripts run in current pane
         tmux send-keys "$cmd" Enter
     else
         open_popup "$name" "$cmd" "$width" "$height"
