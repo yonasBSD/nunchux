@@ -350,7 +350,7 @@ open_popup() {
     [[ "$height" =~ ^[0-9]+$ ]] && height="${height}%"
 
     # Schedule new popup and exit current one
-    tmux run-shell -b "tmux display-popup -E -w $width -h $height -d \"$dir\" $cmd"
+    tmux run-shell -b "tmux display-popup -E -b rounded -T ' nunchux: $name ' -w $width -h $height -d \"$dir\" $cmd"
     exit 0
 }
 

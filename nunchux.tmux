@@ -30,9 +30,9 @@ main() {
     # Bind key to open nunchux in a popup
     # Keys with "-" (like C-Space) bind without prefix, others require prefix
     if [[ $key == *"-"* ]]; then
-        tmux bind-key -n "$key" display-popup -E -w "$width" -h "$height" "$NUNCHUX_CMD"
+        tmux bind-key -n "$key" display-popup -E -B -w "$width" -h "$height" "$NUNCHUX_CMD"
     else
-        tmux bind-key "$key" display-popup -E -w "$width" -h "$height" "$NUNCHUX_CMD"
+        tmux bind-key "$key" display-popup -E -B -w "$width" -h "$height" "$NUNCHUX_CMD"
     fi
 }
 
