@@ -50,6 +50,10 @@ FZF_COLORS="fg+:white:bold,bg+:-1,hl:cyan,hl+:cyan:bold,pointer:cyan,marker:gree
 # App storage
 declare -a CHUCKS=()
 declare -A CHUCK_STATUS=()
+declare -A SUBMENUS=()
+
+# Current submenu filter (empty = main menu)
+CURRENT_SUBMENU=""
 
 # Parse INI config file
 parse_config() {
@@ -57,11 +61,16 @@ parse_config() {
     local current_section=""
     local line key value
     local continued_value="" continued_key=""
-    local app_cmd="" app_desc="" app_width="" app_height="" app_status="" app_status_script=""
+    local app_cmd="" app_desc="" app_width="" app_height="" app_status="" app_status_script="" app_on_exit=""
 
     save_app() {
         if [[ -n "$current_section" && "$current_section" != "settings" && -n "$app_cmd" ]]; then
-            CHUCKS+=("$current_section:$app_cmd:$app_desc:$app_width:$app_height")
+            CHUCKS+=("$current_section:$app_cmd:$app_desc:$app_width:$app_height:$app_on_exit")
+            # Track submenu if section contains /
+            if [[ "$current_section" == */* ]]; then
+                local submenu_name="${current_section%%/*}"
+                SUBMENUS["$submenu_name"]=1
+            fi
             if [[ -n "$app_status_script" ]]; then
                 CHUCK_STATUS["$current_section"]="source ${app_status_script/#\~/$HOME}"
             elif [[ -n "$app_status" ]]; then
@@ -93,7 +102,7 @@ parse_config() {
         if [[ "$line" =~ ^\[([^\]]+)\] ]]; then
             save_app
             current_section="${BASH_REMATCH[1]}"
-            app_cmd="" app_desc="" app_width="" app_height="" app_status="" app_status_script=""
+            app_cmd="" app_desc="" app_width="" app_height="" app_status="" app_status_script="" app_on_exit=""
             continue
         fi
 
@@ -136,6 +145,7 @@ parse_config() {
                     height) app_height="$value" ;;
                     status) app_status="$value" ;;
                     status_script) app_status_script="${value/#\~/$HOME}" ;;
+                    on_exit) app_on_exit="$value" ;;
                 esac
             fi
         fi
@@ -180,6 +190,10 @@ get_app_width() {
 get_app_height() {
     local spec="$1"
     echo "$spec" | cut -d: -f5
+}
+get_app_on_exit() {
+    local spec="$1"
+    echo "$spec" | cut -d: -f6
 }
 
 # Check if app is running (has a tmux window with that name)
@@ -244,13 +258,37 @@ build_menu() {
     local running_apps
     running_apps=$(get_running_apps)
 
+    # If in main menu, show submenu entries first
+    if [[ -z "$CURRENT_SUBMENU" ]]; then
+        for submenu in "${!SUBMENUS[@]}"; do
+            # Format: visible_part \t name \t command \t width \t height \t on_exit
+            # Use special submenu: prefix for name to identify it
+            printf "▸  %-12s  %s\t%s\t%s\t%s\t%s\t%s\n" "$submenu" "" "submenu:$submenu" "" "" ""
+        done
+    fi
+
     while IFS= read -r app; do
-        local name cmd desc width height icon status_output
-        name=$(get_app_name "$app")
+        local full_name name display_name cmd desc width height on_exit icon status_output
+        full_name=$(get_app_name "$app")
         cmd=$(get_app_command "$app")
         desc=$(get_app_description "$app")
         width=$(get_app_width "$app")
         height=$(get_app_height "$app")
+        on_exit=$(get_app_on_exit "$app")
+
+        # Handle submenu filtering
+        if [[ -z "$CURRENT_SUBMENU" ]]; then
+            # Main menu: skip items that belong to a submenu
+            [[ "$full_name" == */* ]] && continue
+            display_name="$full_name"
+            name="$full_name"
+        else
+            # Submenu mode: only show items in this submenu
+            [[ "$full_name" != "$CURRENT_SUBMENU/"* ]] && continue
+            # Display name is the part after the /
+            display_name="${full_name#*/}"
+            name="$full_name"
+        fi
 
         if echo "$running_apps" | grep -qx "$name"; then
             icon="$ICON_RUNNING"
@@ -270,8 +308,8 @@ build_menu() {
             fi
         fi
 
-        # Format: visible_part \t name \t command \t width \t height
-        printf "%s  %-12s  %s\t%s\t%s\t%s\t%s\n" "$icon" "$name" "$desc" "$name" "$cmd" "$width" "$height"
+        # Format: visible_part \t name \t command \t width \t height \t on_exit
+        printf "%s  %-12s  %s\t%s\t%s\t%s\t%s\t%s\n" "$icon" "$display_name" "$desc" "$name" "$cmd" "$width" "$height" "$on_exit"
     done < <(load_apps)
 
     # Add just recipes if justfile exists and enabled
@@ -338,6 +376,7 @@ open_popup() {
     local cmd="$2"
     local app_width="$3"
     local app_height="$4"
+    local on_exit="$5"
     local dir
     dir=$(get_current_dir)
 
@@ -349,8 +388,38 @@ open_popup() {
     [[ "$width" =~ ^[0-9]+$ ]] && width="${width}%"
     [[ "$height" =~ ^[0-9]+$ ]] && height="${height}%"
 
-    # Schedule new popup and exit current one
-    tmux run-shell -b "tmux display-popup -E -b rounded -T ' nunchux: $name ' -w $width -h $height -d \"$dir\" $cmd"
+    if [[ -n "$on_exit" ]]; then
+        # Set up variables for substitution
+        local pane_id tmp script_file
+        pane_id=$(tmux display-message -p '#{pane_id}')
+        tmp="/tmp/nunchux-tmp-$$"
+        script_file="/tmp/nunchux-script-$$"
+
+        # Substitute variables in cmd and on_exit
+        local expanded_cmd="$cmd"
+        local expanded_on_exit="$on_exit"
+        expanded_cmd="${expanded_cmd//\{pane_id\}/$pane_id}"
+        expanded_cmd="${expanded_cmd//\{tmp\}/$tmp}"
+        expanded_cmd="${expanded_cmd//\{dir\}/$dir}"
+        expanded_on_exit="${expanded_on_exit//\{pane_id\}/$pane_id}"
+        expanded_on_exit="${expanded_on_exit//\{tmp\}/$tmp}"
+        expanded_on_exit="${expanded_on_exit//\{dir\}/$dir}"
+
+        # Write command to temp script to avoid quoting issues
+        cat > "$script_file" << NUNCHUX_EOF
+#!/usr/bin/env bash
+cd "$dir"
+$expanded_cmd
+$expanded_on_exit
+rm -f "$script_file"
+NUNCHUX_EOF
+        chmod +x "$script_file"
+
+        tmux run-shell -b "tmux display-popup -E -b rounded -T ' nunchux: $name ' -w $width -h $height '$script_file'"
+    else
+        # Schedule new popup and exit current one
+        tmux run-shell -b "tmux display-popup -E -b rounded -T ' nunchux: $name ' -w $width -h $height -d \"$dir\" $cmd"
+    fi
     exit 0
 }
 
@@ -385,11 +454,19 @@ launch() {
     local script_path
     script_path=$(realpath "$0")
 
+    # Build reload command with submenu context
+    local reload_cmd="$script_path --menu"
+    local header="Enter: popup | Ctrl-O: window | Ctrl-X: kill"
+    if [[ -n "$CURRENT_SUBMENU" ]]; then
+        reload_cmd="$script_path --menu --submenu $CURRENT_SUBMENU"
+        header="Enter: popup | Ctrl-O: window | Ctrl-X: kill | Esc: back"
+    fi
+
     # Run fzf with our menu
     selection=$(build_menu | fzf \
         --delimiter='\t' \
         --with-nth=1 \
-        --header="Enter: popup | Ctrl-O: window | Ctrl-X: kill" \
+        --header="$header" \
         --header-first \
         --prompt="$FZF_PROMPT" \
         --pointer="$FZF_POINTER" \
@@ -400,7 +477,7 @@ launch() {
         --border-label-pos=3 \
         --no-preview \
         --expect=ctrl-o \
-        --bind="ctrl-x:reload($script_path --kill {2} >/dev/null 2>&1; $script_path --menu)" \
+        --bind="ctrl-x:reload($script_path --kill {2} >/dev/null 2>&1; $reload_cmd)" \
         --color="$FZF_COLORS" \
     ) || true
 
@@ -417,12 +494,13 @@ launch() {
         return 0
     fi
 
-    # Extract fields (tab-separated: visible \t name \t cmd \t width \t height)
-    local name cmd width height
+    # Extract fields (tab-separated: visible \t name \t cmd \t width \t height \t on_exit)
+    local name cmd width height on_exit
     name=$(echo "$selected_line" | cut -f2)
     cmd=$(echo "$selected_line" | cut -f3)
     width=$(echo "$selected_line" | cut -f4)
     height=$(echo "$selected_line" | cut -f5)
+    on_exit=$(echo "$selected_line" | cut -f6)
 
     if [[ -z "$name" ]]; then
         return 0
@@ -435,6 +513,10 @@ launch() {
         else
             open_app "$name" "$cmd"
         fi
+    elif [[ "$name" == submenu:* ]]; then
+        # Open submenu - exec ourselves with --submenu flag
+        local submenu_name="${name#submenu:}"
+        exec "$script_path" --submenu "$submenu_name"
     elif [[ "$name" == just:* || "$name" == npm:* ]]; then
         # Just recipes and npm scripts run in current pane
         tmux send-keys "$cmd" Enter
@@ -442,7 +524,7 @@ launch() {
         # App is running, switch to it
         switch_to_app "$name"
     else
-        open_popup "$name" "$cmd" "$width" "$height"
+        open_popup "$name" "$cmd" "$width" "$height" "$on_exit"
     fi
 }
 
@@ -510,6 +592,10 @@ main() {
             kill_app "$1"
             ;;
         --menu)
+            # Support --menu with optional submenu filter
+            if [[ "${2:-}" == "--submenu" ]]; then
+                CURRENT_SUBMENU="$3"
+            fi
             build_menu
             ;;
         --list)
@@ -524,6 +610,12 @@ main() {
                 popup_height) echo "$APP_POPUP_HEIGHT" ;;
                 *) echo "Unknown config: $1" >&2; exit 1 ;;
             esac
+            ;;
+        --submenu)
+            shift
+            CURRENT_SUBMENU="$1"
+            FZF_BORDER_LABEL=" $CURRENT_SUBMENU "
+            launch
             ;;
         --help|-h|help)
             usage

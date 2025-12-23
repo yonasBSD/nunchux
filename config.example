@@ -28,6 +28,16 @@ fzf_colors = fg+:white:bold,bg+:-1,hl:cyan,hl+:cyan:bold,pointer:cyan,marker:gre
 #   height        = popup height
 #   status        = shell command for dynamic status
 #   status_script = path to script for complex status
+#   on_exit       = command to run after app exits
+#
+# Variables available in cmd and on_exit:
+#   {pane_id}     = parent tmux pane ID
+#   {tmp}         = fresh temp file path
+#   {dir}         = starting directory
+#
+# Submenus:
+#   Use [parent/child] section names to create submenus.
+#   The parent appears in the main menu; selecting it opens the submenu.
 
 [btop]
 cmd = btop
@@ -55,8 +65,15 @@ status = n=$(docker ps -q 2>/dev/null | wc -l | tr -d ' '); [[ $n -gt 0 ]] && ec
 # [files]
 # # yazi doesn't work directly in tmux popups due to terminal passthrough issues.
 # # Workaround: wrap in nvim terminal. See https://github.com/sxyazi/yazi/issues/2308
-# cmd = nvim --clean -c 'set laststatus=0 cmdheight=0 noshowmode noruler signcolumn=no nonumber' -c 'terminal yazi' -c 'startinsert' -c 'autocmd TermClose * qa!'
+# cmd = nvim --clean -c 'set laststatus=0 cmdheight=0 noshowmode noruler signcolumn=no nonumber' -c 'terminal yazi --cwd-file={tmp}' -c 'startinsert' -c 'autocmd TermClose * qa!'
 # desc = File manager
+# # Only cd if pane is at a shell prompt (not in vim, etc.)
+# on_exit = cwd=$(cat {tmp} 2>/dev/null); \
+#   if [[ -d "$cwd" ]]; then \
+#     cmd=$(tmux display-message -t {pane_id} -p '#{pane_current_command}'); \
+#     [[ "$cmd" =~ ^(bash|zsh|fish|sh)$ ]] && tmux send-keys -t {pane_id} "cd \"$cwd\"" Enter; \
+#   fi; \
+#   rm -f {tmp}
 
 # [notes]
 # cmd = nvim ~/notes
@@ -69,3 +86,16 @@ status = n=$(docker ps -q 2>/dev/null | wc -l | tr -d ' '); [[ $n -gt 0 ]] && ec
 # width = 70
 # height = 50
 # status = n=$(wc -l < ~/todos.md 2>/dev/null || echo 0); echo "($n lines)"
+
+# Submenu example - these appear under "control" in the main menu
+# [control/wifi]
+# cmd = nmtui
+# desc = WiFi settings
+#
+# [control/sound]
+# cmd = pavucontrol
+# desc = Audio mixer
+#
+# [control/display]
+# cmd = arandr
+# desc = Display settings
