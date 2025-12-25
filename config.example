@@ -104,18 +104,50 @@ status = n=$(docker ps -q 2>/dev/null | wc -l | tr -d ' '); [[ $n -gt 0 ]] && ec
 # height = 50
 # status = n=$(wc -l < ~/todos.md 2>/dev/null || echo 0); echo "($n lines)"
 
-# Submenu example - these appear under "control" in the main menu
-# [control/wifi]
-# cmd = nmtui
-# desc = WiFi settings
+# System submenu example
+# Submenus use [parent/child] naming. The parent shows in the main menu,
+# selecting it opens the submenu with all its children.
 #
-# [control/sound]
-# cmd = pavucontrol
-# desc = Audio mixer
+# Prerequisites for this example:
+#   btop       - System monitor          (https://github.com/aristocratos/btop)
+#   impala     - WiFi manager TUI        (https://github.com/pythops/impala)
+#   bluetuith  - Bluetooth manager TUI   (https://github.com/darkhz/bluetuith)
+#   bandwhich  - Bandwidth by process    (https://github.com/imsnif/bandwhich)
+#   duf        - Disk usage overview     (https://github.com/muesli/duf)
+#   ncdu       - Disk usage analyzer     (https://dev.yorhel.nl/ncdu)
 #
-# [control/display]
-# cmd = arandr
-# desc = Display settings
+# The [system] section (without /child) defines the submenu's status line.
+
+# [system]
+# status = load=$(cut -d' ' -f1 /proc/loadavg); \
+#          ram=$(awk '/MemAvailable/{printf "%.0f", $2/1024/1024}' /proc/meminfo); \
+#          echo "load: $load | ${ram}GB free"
+#
+# [system/btop]
+# cmd = btop
+# desc = Task manager
+#
+# [system/impala]
+# cmd = impala
+# desc = WiFi manager
+#
+# [system/bluetuith]
+# cmd = bluetuith
+# desc = Bluetooth manager
+#
+# [system/bandwhich]
+# cmd = sudo bandwhich
+# desc = Bandwidth by process
+#
+# [system/duf]
+# cmd = duf -only local | less -R
+# desc = Disk usage overview
+# width = 60
+# height = 30
+#
+# [system/ncdu]
+# cmd = ncdu
+# desc = Disk usage analyzer
 
 # Directory browser
 # Instead of cmd, use "directory" to create a file browser.
