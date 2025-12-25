@@ -27,20 +27,7 @@ in the menu. Select and run.
 
 ## What it looks like
 
-```
-┌─ nunchux ─────────────────────────────────────────┐
-│ Enter: popup | Ctrl-O: window | Ctrl-X: kill      │
-│  >                                                │
-│   ●  btop          load: 0.42 | ram: 12GB free    │
-│   ○  git           (3 changed)                    │
-│   ○  docker        (2 running)                    │
-│   ○  files         (~/.config)                    │
-│   ─── just ───────────────────                    │
-│   »  build                                        │
-│   »  test                                         │
-│   »  deploy                                       │
-└───────────────────────────────────────────────────┘
-```
+![nunchux demo](docs/demo.gif)
 
 ## How to install it
 
