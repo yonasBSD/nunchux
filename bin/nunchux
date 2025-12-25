@@ -54,6 +54,10 @@ FZF_COLORS="fg+:white:bold,bg+:-1,hl:cyan,hl+:cyan:bold,pointer:cyan,marker:gree
 # Cache settings
 MENU_CACHE_TTL=60
 
+# Directory browser exclusion patterns (comma-separated)
+# Patterns with / are matched against full path, others against filename
+EXCLUDE_PATTERNS=".git, node_modules, Cache, cache, .cache, GPUCache, CachedData, blob_storage, Code Cache, Session Storage, Local Storage, IndexedDB, databases, *.db, *.db-*, *.sqlite*, *.log, *.png, *.jpg, *.jpeg, *.gif, *.ico, *.webp, *.woff*, *.ttf, *.lock, lock, *.pid"
+
 # Internal field separator for app specs (colons appear in commands)
 readonly APP_SEP=":::"
 
@@ -259,6 +263,7 @@ parse_config() {
                     fzf_border_label) FZF_BORDER_LABEL="$value" ;;
                     fzf_colors) FZF_COLORS="$value" ;;
                     cache_ttl) MENU_CACHE_TTL="$value" ;;
+                    exclude_patterns) EXCLUDE_PATTERNS="$value" ;;
                 esac
             else
                 case "$key" in
@@ -546,37 +551,23 @@ build_dirbrowse_menu() {
     # Build find command with depth and exclusions
     local find_args=()
     find_args+=("$dir" -maxdepth "$depth" -type f)
-    # Exclude common non-text patterns
-    find_args+=(
-        ! -path '*/.git/*'
-        ! -path '*/node_modules/*'
-        ! -path '*/Cache/*'
-        ! -path '*/cache/*'
-        ! -path '*/.cache/*'
-        ! -path '*/GPUCache/*'
-        ! -path '*/CachedData/*'
-        ! -path '*/blob_storage/*'
-        ! -path '*/Code Cache/*'
-        ! -path '*/Session Storage/*'
-        ! -path '*/Local Storage/*'
-        ! -path '*/IndexedDB/*'
-        ! -path '*/databases/*'
-        ! -name '*.db'
-        ! -name '*.db-*'
-        ! -name '*.sqlite*'
-        ! -name '*.log'
-        ! -name '*.png'
-        ! -name '*.jpg'
-        ! -name '*.jpeg'
-        ! -name '*.gif'
-        ! -name '*.ico'
-        ! -name '*.webp'
-        ! -name '*.woff*'
-        ! -name '*.ttf'
-        ! -name '*.lock'
-        ! -name 'lock'
-        ! -name '*.pid'
-    )
+    # Apply exclusion patterns from config
+    # Patterns starting with * are filename globs, others are directory names
+    IFS=',' read -ra exclude_patterns <<< "$EXCLUDE_PATTERNS"
+    for pattern in "${exclude_patterns[@]}"; do
+        # Trim whitespace
+        pattern="${pattern#"${pattern%%[![:space:]]*}"}"
+        pattern="${pattern%"${pattern##*[![:space:]]}"}"
+        [[ -z "$pattern" ]] && continue
+
+        if [[ "$pattern" == \** ]]; then
+            # Glob pattern - match filename only
+            find_args+=(! -name "$pattern")
+        else
+            # Directory/file name - exclude both paths containing it and files named it
+            find_args+=(! -path "*/$pattern/*" ! -name "$pattern")
+        fi
+    done
 
     # Apply glob filter if specified
     if [[ -n "$glob_pattern" ]]; then
@@ -1174,19 +1165,25 @@ Configuration:
     Config file: $NUNCHUX_RC_FILE
     Fallback:    $NUNCHUX_RC_FALLBACK
 
-    Example config:
-        # Icons
-        ICON_RUNNING="●"
-        ICON_STOPPED="○"
+    Example config (INI format):
+        [settings]
+        icon_running = ●
+        icon_stopped = ○
+        popup_width = 90%
+        popup_height = 90%
 
-        # Default popup dimensions
-        APP_POPUP_WIDTH="90%"
-        APP_POPUP_HEIGHT="90%"
+        [btop]
+        cmd = btop
+        desc = System monitor
 
-        # Apps: chuck name command description [width] [height]
-        chuck btop       "btop"         "System monitor"
-        chuck lazygit    "lazygit"      "Git TUI"         95 95
-        chuck notes      "nvim ~/notes" "Quick notes"     80 60
+        [lazygit]
+        cmd = lazygit
+        width = 95
+        height = 95
+
+        [system/wifi]
+        cmd = impala
+        desc = WiFi manager
 
 Controls:
     Enter           Open in popup

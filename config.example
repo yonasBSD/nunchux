@@ -35,6 +35,17 @@ cache_ttl = 60
 #
 # Set to 0 to disable caching entirely for that menu.
 
+# exclude_patterns (for directory browsers)
+# ------------------------------------------
+# Comma-separated list of patterns to exclude from directory browsers.
+# - Patterns starting with * are filename globs (e.g., *.log, *.db)
+# - Other patterns exclude both directories and files with that name
+#
+# Default excludes common non-text files: .git, node_modules, cache dirs,
+# databases, images, fonts, lock files, etc.
+#
+# Example: exclude_patterns = .git, node_modules, *.log, *.tmp, build
+
 # Apps
 # Each section defines an app. The section name becomes the window name.
 #
