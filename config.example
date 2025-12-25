@@ -17,6 +17,23 @@ fzf_pointer = ▶
 fzf_border = rounded
 fzf_border_label =  nunchux
 fzf_colors = fg+:white:bold,bg+:-1,hl:cyan,hl+:cyan:bold,pointer:cyan,marker:green,header:gray,border:gray
+cache_ttl = 60
+
+# A few words about cache_ttl
+# ----------------------------
+# Nunchux caches menus to make them open instantly. When you open a menu,
+# you see the cached version right away while fresh data loads in the background.
+# Once ready, the menu hot-swaps to show updated info.
+#
+# cache_ttl controls how long (in seconds) a cache is considered "fresh enough"
+# to show instantly. After this time, the menu builds from scratch (with the
+# nice streaming effect where items appear one by one).
+#
+# - In [settings]: sets the default for main menu and all submenus (default: 60)
+# - In a submenu like [system]: overrides just that submenu
+# - In a directory browser: controls that browser (default: 300 for dir browsers)
+#
+# Set to 0 to disable caching entirely for that menu.
 
 # Apps
 # Each section defines an app. The section name becomes the window name.
@@ -99,3 +116,28 @@ status = n=$(docker ps -q 2>/dev/null | wc -l | tr -d ' '); [[ $n -gt 0 ]] && ec
 # [control/display]
 # cmd = arandr
 # desc = Display settings
+
+# Directory browser
+# Instead of cmd, use "directory" to create a file browser.
+# Selected files open in $VISUAL, $EDITOR, or nvim (in that order).
+#
+# Available options:
+#   directory      = path to browse (required, replaces cmd)
+#   depth          = how many levels deep to search (default: 1)
+#   sort           = sorting mode: "modified", "modified-folder", or "alphabetical"
+#   sort_direction = "ascending" or "descending" (default: descending)
+#   cache_ttl      = cache duration in seconds (default: 300)
+#   glob           = filter files by pattern (e.g., "*.conf")
+#   width          = popup width
+#   height         = popup height
+#
+# Sort modes:
+#   modified        = newest files first
+#   modified-folder = folders grouped by most recent file, then files by recency
+#   alphabetical    = sorted by folder/filename
+
+# [configs]
+# directory = ~/.config
+# depth = 2
+# sort = modified-folder
+# cache_ttl = 300
