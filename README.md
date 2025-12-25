@@ -69,7 +69,11 @@ set -g @nunchux-key 'C-Space'
 
 ## Configuring your apps
 
-Create a config file at `~/.config/nunchux/config` (or `~/.nunchuxrc`):
+Create a config file at `~/.config/nunchux/config` (or `~/.nunchuxrc`).
+Or just run `nunchux` without a config and it will offer to create one for you.
+
+See [docs/configuration.md](docs/configuration.md) for the full reference and
+[docs/examples.md](docs/examples.md) for real-world examples.
 
 ```ini
 [settings]
@@ -154,5 +158,6 @@ status = f=$(nearest notes.md) && echo "($(lines "$f"), $(ago "$f"))"
 
 * tmux (duh)
 * fzf
+* curl (for menu hot-swap)
 * jq (optional, for npm scripts)
 * just (optional, for justfile integration)
