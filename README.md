@@ -14,16 +14,16 @@ running. No more hunting through tmux windows to find where you left lazygit.
 * Kill running apps with Ctrl-X
 * Dynamic status info (git changes, docker containers, system load, etc.)
 
-### Justfile integration
+### Plugin integrations
 
-If you're in a directory with a justfile, nunchux will show your recipes right
-there in the menu. Select one and it runs in your current pane so you can see
-the output. No more typing `just build` like a caveman.
+Nunchux has a plugin system for task runners. Plugins auto-detect when the
+relevant tool is available and show tasks right in the menu. Select one and it
+runs in your current pane.
 
-### package.json scripts
-
-Same deal for npm scripts. If there's a package.json, you'll see your scripts
-in the menu. Select and run.
+Built-in plugins:
+* **just** - Justfile recipes (requires [just](https://github.com/casey/just))
+* **npm** - package.json scripts (requires npm)
+* **task** - Taskfile tasks (requires [task](https://taskfile.dev/) or go-task)
 
 ## What it looks like
 
@@ -70,8 +70,9 @@ menu_width = 60%
 menu_height = 50%
 popup_width = 90%
 popup_height = 90%
-just_enabled = true
-npm_enabled = true
+plugin_enabled_just = true
+plugin_enabled_npm = true
+plugin_enabled_task = true
 
 [btop]
 cmd = btop
@@ -97,7 +98,7 @@ In `[settings]`:
 * `icon_running` / `icon_stopped` - status indicators
 * `menu_width` / `menu_height` - dimensions for the nunchux menu popup
 * `popup_width` / `popup_height` - default dimensions for app popups
-* `just_enabled` / `npm_enabled` - toggle integrations
+* `plugin_enabled_*` - toggle plugin integrations (just, npm, task)
 * `fzf_*` - customize fzf appearance
 
 Per app:
@@ -146,5 +147,6 @@ status = f=$(nearest notes.md) && echo "($(lines "$f"), $(ago "$f"))"
 * tmux (duh)
 * fzf
 * curl (for menu hot-swap)
-* jq (optional, for npm scripts)
-* just (optional, for justfile integration)
+* jq (optional, for npm/task plugins)
+* just (optional, for justfile plugin)
+* task or go-task (optional, for Taskfile plugin - named go-task on some systems to avoid conflict with [Taskwarrior](https://taskwarrior.org/))

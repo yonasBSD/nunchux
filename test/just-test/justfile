@@ -1,0 +1,20 @@
+# Test justfile for nunchux plugin testing
+
+# Say hello
+hello:
+    echo "Hello from just!"
+
+# Build something
+build:
+    echo "Building..."
+    sleep 1
+    echo "Done!"
+
+# Run tests
+test:
+    echo "Running tests..."
+    echo "All tests passed!"
+
+# Clean up
+clean:
+    echo "Cleaning..."

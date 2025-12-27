@@ -38,12 +38,6 @@ MENU_HEIGHT="50%"
 APP_POPUP_WIDTH="90%"
 APP_POPUP_HEIGHT="90%"
 
-# Justfile integration (set to false to disable)
-JUST_ENABLED=true
-
-# package.json scripts integration (set to false to disable)
-NPM_ENABLED=true
-
 # FZF styling
 FZF_PROMPT=" "
 FZF_POINTER="▶"
@@ -148,6 +142,41 @@ declare -A DIRBROWSE_CACHE_TTL=()
 CURRENT_SUBMENU=""
 # Current directory browser (empty = not in dirbrowse mode)
 CURRENT_DIRBROWSE=""
+
+# Plugin system
+declare -a LOADED_PLUGINS=()
+
+# Load all plugins from plugins directory
+load_plugins() {
+    local script_dir plugin_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    plugin_dir="$script_dir/../plugins"
+
+    [[ ! -d "$plugin_dir" ]] && return
+
+    for plugin_file in "$plugin_dir"/*.sh; do
+        [[ -f "$plugin_file" ]] || continue
+
+        # Source in subshell to get name, then source for real with namespacing
+        local name
+        name=$(source "$plugin_file"; plugin_name)
+
+        # Source and copy functions with namespaced names
+        source "$plugin_file"
+        eval "$(declare -f plugin_items | sed "1s/plugin_items/${name}_items/")"
+        eval "$(declare -f plugin_label | sed "1s/plugin_label/${name}_label/")"
+        unset -f plugin_name plugin_label plugin_items
+
+        LOADED_PLUGINS+=("$name")
+    done
+}
+
+# Check if a plugin is enabled (default: true)
+is_plugin_enabled() {
+    local name="$1"
+    local var="PLUGIN_ENABLED_${name^^}"
+    [[ "${!var:-true}" == "true" ]]
+}
 
 # Parse INI config file
 parse_config() {
@@ -255,8 +284,10 @@ parse_config() {
                     menu_height) MENU_HEIGHT="$value" ;;
                     popup_width) APP_POPUP_WIDTH="$value" ;;
                     popup_height) APP_POPUP_HEIGHT="$value" ;;
-                    just_enabled) JUST_ENABLED="$value" ;;
-                    npm_enabled) NPM_ENABLED="$value" ;;
+                    plugin_enabled_*)
+                        # plugin_enabled_just -> PLUGIN_ENABLED_JUST
+                        declare -g "${key^^}=$value"
+                        ;;
                     fzf_prompt) FZF_PROMPT="$value" ;;
                     fzf_pointer) FZF_POINTER="$value" ;;
                     fzf_border) FZF_BORDER="$value" ;;
@@ -295,6 +326,9 @@ elif [[ -f "$NUNCHUX_RC_FALLBACK" ]]; then
     parse_config "$NUNCHUX_RC_FALLBACK"
 fi
 
+# Load plugins
+load_plugins
+
 # Check if any apps or directory browsers are configured
 has_config() {
     [[ ${#CHUCKS[@]} -gt 0 || ${#DIRBROWSE_DIR[@]} -gt 0 ]]
@@ -332,52 +366,6 @@ is_app_running() {
 # Get list of running app windows
 get_running_apps() {
     tmux list-windows -F '#{window_name}' 2>/dev/null || true
-}
-
-# Find justfile by searching upward from given directory
-find_justfile() {
-    local dir="$1"
-    while [[ "$dir" != "/" ]]; do
-        if [[ -f "$dir/justfile" || -f "$dir/Justfile" || -f "$dir/.justfile" ]]; then
-            echo "$dir"
-            return 0
-        fi
-        dir=$(dirname "$dir")
-    done
-    return 1
-}
-
-# Get just recipes from a directory
-get_just_recipes() {
-    local dir="$1"
-    just --justfile "$dir/justfile" --summary 2>/dev/null || \
-    just --justfile "$dir/Justfile" --summary 2>/dev/null || \
-    just --justfile "$dir/.justfile" --summary 2>/dev/null || true
-}
-
-# Find package.json by searching upward from given directory
-find_package_json() {
-    local dir="$1"
-    while [[ "$dir" != "/" ]]; do
-        if [[ -f "$dir/package.json" ]]; then
-            echo "$dir"
-            return 0
-        fi
-        dir=$(dirname "$dir")
-    done
-    return 1
-}
-
-# Get npm scripts from a directory
-get_npm_scripts() {
-    local dir="$1"
-    if command -v jq &>/dev/null; then
-        jq -r '.scripts // {} | keys[]' "$dir/package.json" 2>/dev/null || true
-    else
-        # Fallback without jq - basic grep approach
-        grep -oP '(?<="scripts"\s*:\s*\{)[^}]*' "$dir/package.json" 2>/dev/null | \
-            grep -oP '"[^"]+"\s*:' | tr -d '":' | tr -s ' ' '\n' || true
-    fi
 }
 
 # Nunchucks ASCII art for popups
@@ -866,40 +854,40 @@ build_menu() {
         printf "%s  %-12s  %s\t%s\t%s\t%s\t%s\t%s\n" "$icon" "$display_name" "$desc" "$name" "$cmd" "$width" "$height" "$on_exit"
     done < <(load_apps)
 
-    # Add just recipes if justfile exists and enabled
-    if [[ "$JUST_ENABLED" == "true" ]]; then
-        local current_dir justfile_dir recipes
-        current_dir=$(get_current_dir)
-        if justfile_dir=$(find_justfile "$current_dir"); then
-            recipes=$(get_just_recipes "$justfile_dir")
-            if [[ -n "$recipes" ]]; then
-                # Divider
-                printf "   ─── just ───────────────────\t\t\t\t\t\n"
-                for recipe in $recipes; do
-                    # Format: visible_part \t name \t command \t width \t height
-                    printf "»  %-12s  %s\t%s\t%s\t%s\t%s\n" "$recipe" "" "just:$recipe" "cd $justfile_dir && just $recipe" "" ""
-                done
-            fi
-        fi
-    fi
+    # Add items from loaded plugins
+    # First pass: collect all plugin data and find max display name width
+    local -a plugin_data=()
+    local max_width=0
+    for plugin in "${LOADED_PLUGINS[@]}"; do
+        is_plugin_enabled "$plugin" || continue
 
-    # Add npm scripts if package.json exists and enabled
-    if [[ "$NPM_ENABLED" == "true" ]]; then
-        local current_dir pkg_dir scripts
-        current_dir=$(get_current_dir)
-        if pkg_dir=$(find_package_json "$current_dir"); then
-            scripts=$(get_npm_scripts "$pkg_dir")
-            if [[ -n "$scripts" ]]; then
-                # Divider
-                printf "   ─── npm ────────────────────\t\t\t\t\t\n"
-                while IFS= read -r script; do
-                    [[ -z "$script" ]] && continue
-                    # Format: visible_part \t name \t command \t width \t height
-                    printf "»  %-12s  %s\t%s\t%s\t%s\t%s\n" "$script" "" "npm:$script" "cd $pkg_dir && npm run $script" "" ""
-                done <<< "$scripts"
-            fi
+        local items label
+        items=$("${plugin}_items")
+        [[ -z "$items" ]] && continue
+
+        label=$("${plugin}_label")
+        while IFS=$'\t' read -r item cmd desc; do
+            [[ -z "$item" ]] && continue
+            local display_name="$label $item"
+            local width=${#display_name}
+            (( width > max_width )) && max_width=$width
+            plugin_data+=("$plugin"$'\t'"$label"$'\t'"$item"$'\t'"$cmd"$'\t'"$desc")
+        done <<< "$items"
+    done
+
+    # Second pass: output with consistent width
+    local current_plugin=""
+    for entry in "${plugin_data[@]}"; do
+        IFS=$'\t' read -r plugin label item cmd desc <<< "$entry"
+        # Print divider when plugin changes
+        if [[ "$plugin" != "$current_plugin" ]]; then
+            printf "   ─── %s ───────────────────\t\t\t\t\t\n" "$label"
+            current_plugin="$plugin"
         fi
-    fi
+        local display_name="$label $item"
+        local name="${plugin}:${item}"
+        printf "%s  %-${max_width}s  %s\t%s\t%s\t\t\t\n" "$ICON_STOPPED" "$display_name" "$desc" "$name" "$cmd"
+    done
 }
 
 # Build common fzf options array
@@ -1270,9 +1258,32 @@ launch() {
         local dirbrowse_name="${name#dirbrowse:}"
         launch_dirbrowse "$dirbrowse_name"
         return
-    elif [[ "$name" == just:* || "$name" == npm:* ]]; then
-        # Just recipes and npm scripts run in current pane
-        tmux send-keys "$cmd" Enter
+    elif [[ "$name" == *:* ]]; then
+        # Check if this is a plugin item
+        local plugin_prefix="${name%%:*}"
+        local is_plugin=false
+        for p in "${LOADED_PLUGINS[@]}"; do
+            [[ "$p" == "$plugin_prefix" ]] && { is_plugin=true; break; }
+        done
+        if $is_plugin; then
+            # Plugin items run in the parent pane (not the popup)
+            local target_pane="${NUNCHUX_PARENT_PANE:-}"
+            # Try tmux environment if shell env is empty
+            [[ -z "$target_pane" ]] && target_pane=$(tmux show-environment NUNCHUX_PARENT_PANE 2>/dev/null | cut -d= -f2)
+            if [[ -n "$target_pane" ]]; then
+                tmux send-keys -t "$target_pane" "$cmd" Enter
+            else
+                # Fallback if not running in popup
+                tmux send-keys "$cmd" Enter
+            fi
+            return
+        fi
+        # Not a plugin, fall through to normal handling
+        if is_app_running "$name"; then
+            switch_to_app "$name"
+        else
+            open_popup "$name" "$cmd" "$width" "$height" "$on_exit"
+        fi
     elif is_app_running "$name"; then
         # App is running, switch to it
         switch_to_app "$name"

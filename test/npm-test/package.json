@@ -1,0 +1,12 @@
+{
+  "name": "nunchux-npm-test",
+  "version": "1.0.0",
+  "description": "Test package for nunchux npm plugin",
+  "scripts": {
+    "hello": "echo 'Hello from npm!'",
+    "build": "echo 'Building...' && sleep 1 && echo 'Done!'",
+    "test": "echo 'Running tests...' && echo 'All tests passed!'",
+    "lint": "echo 'Linting...'",
+    "start": "echo 'Starting server...'"
+  }
+}

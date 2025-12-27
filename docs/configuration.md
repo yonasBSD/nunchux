@@ -16,8 +16,9 @@ The `[settings]` section controls global behavior:
 | `menu_height` | `50%` | Height of the app selector menu |
 | `popup_width` | `90%` | Default width for app popups |
 | `popup_height` | `90%` | Default height for app popups |
-| `just_enabled` | `true` | Show tasks from `justfile` |
-| `npm_enabled` | `true` | Show scripts from `package.json` |
+| `plugin_enabled_just` | `true` | Show recipes from `justfile` |
+| `plugin_enabled_npm` | `true` | Show scripts from `package.json` |
+| `plugin_enabled_task` | `true` | Show tasks from `Taskfile.yml` |
 | `fzf_prompt` | ` ` | Prompt shown in fzf |
 | `fzf_pointer` | `▶` | Pointer for selected item |
 | `fzf_border` | `rounded` | Border style (`rounded`, `sharp`, `double`, etc.) |

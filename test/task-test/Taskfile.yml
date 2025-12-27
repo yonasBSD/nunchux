@@ -1,0 +1,30 @@
+version: '3'
+
+tasks:
+  hello:
+    desc: Say hello
+    cmds:
+      - echo "Hello from task!"
+
+  build:
+    desc: Build something
+    cmds:
+      - echo "Building..."
+      - sleep 1
+      - echo "Done!"
+
+  test:
+    desc: Run tests
+    cmds:
+      - echo "Running tests..."
+      - echo "All tests passed!"
+
+  clean:
+    desc: Clean up
+    cmds:
+      - echo "Cleaning..."
+
+  dev:
+    desc: Run in development mode
+    cmds:
+      - echo "Starting dev server..."

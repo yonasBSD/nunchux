@@ -10,8 +10,10 @@ menu_width = 60%
 menu_height = 50%
 popup_width = 90%
 popup_height = 90%
-just_enabled = true
-npm_enabled = true
+# Plugin toggles (all default to true)
+plugin_enabled_just = true
+plugin_enabled_npm = true
+plugin_enabled_task = true
 fzf_prompt =
 fzf_pointer = ▶
 fzf_border = rounded
