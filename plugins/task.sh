@@ -3,6 +3,7 @@
 
 plugin_name() { echo "task"; }
 plugin_label() { echo "task"; }
+plugin_icon() { echo "✓"; }
 
 plugin_items() {
     # Support both 'task' and 'go-task' binary names

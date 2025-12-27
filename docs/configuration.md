@@ -19,6 +19,7 @@ The `[settings]` section controls global behavior:
 | `plugin_enabled_just` | `true` | Show recipes from `justfile` |
 | `plugin_enabled_npm` | `true` | Show scripts from `package.json` |
 | `plugin_enabled_task` | `true` | Show tasks from `Taskfile.yml` |
+| `plugin_icon_*` | (plugin default) | Override icon for a specific plugin (e.g., `plugin_icon_just`) |
 | `fzf_prompt` | ` ` | Prompt shown in fzf |
 | `fzf_pointer` | `▶` | Pointer for selected item |
 | `fzf_border` | `rounded` | Border style (`rounded`, `sharp`, `double`, etc.) |

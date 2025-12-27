@@ -14,6 +14,10 @@ popup_height = 90%
 plugin_enabled_just = true
 plugin_enabled_npm = true
 plugin_enabled_task = true
+# Override plugin icons (optional)
+# plugin_icon_just =
+# plugin_icon_npm =
+# plugin_icon_task = 󰟓
 fzf_prompt =
 fzf_pointer = ▶
 fzf_border = rounded

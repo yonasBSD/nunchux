@@ -3,6 +3,7 @@
 
 plugin_name() { echo "just"; }
 plugin_label() { echo "just"; }
+plugin_icon() { echo "🤖"; }
 
 plugin_items() {
     command -v just &>/dev/null || return
