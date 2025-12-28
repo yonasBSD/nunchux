@@ -198,10 +198,10 @@ taskrunner_launch() {
 
     $is_runner || return 1
 
-    # Get task name for window/popup title (e.g., "just: hello")
+    # Get task name for window/popup title (e.g., "just » hello")
     local runner="${name%%:*}"
     local task="${name#*:}"
-    local task_name="$runner: $task"
+    local task_name="$runner » $task"
     local dir
     dir=$(get_current_dir)
 
@@ -210,17 +210,17 @@ taskrunner_launch() {
     local full_cmd="$cmd"'
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
-    tmux rename-window -t "$TMUX_PANE" "'"$TASKRUNNER_ICON_SUCCESS"' '"$task_name"'"
+    tmux rename-window -t "$TMUX_PANE" "'"$task_name"' '"$TASKRUNNER_ICON_SUCCESS"'"
 else
-    tmux rename-window -t "$TMUX_PANE" "'"$TASKRUNNER_ICON_FAILED"' '"$task_name"'"
+    tmux rename-window -t "$TMUX_PANE" "'"$task_name"' '"$TASKRUNNER_ICON_FAILED"'"
 fi
 echo
 echo "Press any key to close..."
 read -n 1 -s'
 
-    # Check if window for this task already exists (ends with task_name)
+    # Check if window for this task already exists (starts with task_name)
     local existing_window
-    existing_window=$(tmux list-windows -F '#{window_id} #{window_name}' | grep " $task_name$" | head -1 | cut -d' ' -f1)
+    existing_window=$(tmux list-windows -F '#{window_id} #{window_name}' | grep -F "$task_name" | head -1 | cut -d' ' -f1)
 
     # Remember current window for primary action
     local current_window
@@ -228,7 +228,7 @@ read -n 1 -s'
 
     if [[ -n "$existing_window" ]]; then
         # Reuse existing window - rename and respawn
-        tmux rename-window -t "$existing_window" "$TASKRUNNER_ICON_RUNNING $task_name"
+        tmux rename-window -t "$existing_window" "$task_name $TASKRUNNER_ICON_RUNNING"
         tmux respawn-window -k -t "$existing_window" -c "$dir" bash -c "$full_cmd"
         if [[ "$key" == "$SECONDARY_KEY" ]]; then
             tmux select-window -t "$existing_window"
@@ -239,9 +239,9 @@ read -n 1 -s'
     else
         # Create new window
         if [[ "$key" == "$SECONDARY_KEY" ]]; then
-            tmux new-window -n "$TASKRUNNER_ICON_RUNNING $task_name" -c "$dir" bash -c "$full_cmd"
+            tmux new-window -n "$task_name $TASKRUNNER_ICON_RUNNING" -c "$dir" bash -c "$full_cmd"
         else
-            tmux new-window -d -n "$TASKRUNNER_ICON_RUNNING $task_name" -c "$dir" bash -c "$full_cmd"
+            tmux new-window -d -n "$task_name $TASKRUNNER_ICON_RUNNING" -c "$dir" bash -c "$full_cmd"
         fi
     fi
 
@@ -259,12 +259,12 @@ taskrunner_kill() {
     local runner="${name%%:*}"
     local task="${name#*:}"
 
-    # Window name format: "icon runner: task" - we match on "runner: task" suffix
-    local task_name="$runner: $task"
+    # Window name format: "runner » task icon" - match on "runner » task" prefix
+    local task_name="$runner » $task"
 
-    # Find window ending with this task name (could have any status icon prefix)
+    # Find window starting with this task name (icon suffix varies)
     local window_id
-    window_id=$(tmux list-windows -F '#{window_id} #{window_name}' 2>/dev/null | grep -F " $task_name" | head -1 | cut -d' ' -f1)
+    window_id=$(tmux list-windows -F '#{window_id} #{window_name}' 2>/dev/null | grep -F "$task_name" | head -1 | cut -d' ' -f1)
 
     if [[ -n "$window_id" ]]; then
         tmux kill-window -t "$window_id" 2>/dev/null
