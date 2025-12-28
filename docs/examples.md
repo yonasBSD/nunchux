@@ -183,6 +183,44 @@ cmd = nvtop
 desc = GPU monitoring
 ```
 
+## Task Runners
+
+Enable task runners to show project tasks in the menu:
+
+```ini
+# Enable just and npm task runners
+[taskrunner:just]
+enabled = true
+icon = 🤖
+
+[taskrunner:npm]
+enabled = true
+icon = 📦
+
+# Customize status icons (optional)
+[taskrunner]
+icon_running = 🔄
+icon_success = ✅
+icon_failed = ❌
+```
+
+With nerd fonts:
+
+```ini
+[taskrunner:just]
+enabled = true
+icon =
+
+[taskrunner:npm]
+enabled = true
+icon =
+
+[taskrunner]
+icon_running =
+icon_success =
+icon_failed =
+```
+
 ## Simple Apps
 
 Apps that just need a command and description:

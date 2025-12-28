@@ -223,4 +223,39 @@ Task runners are **disabled by default** and must be explicitly enabled.
 | `npm` | npm scripts | `package.json` with scripts |
 | `task` | [Task](https://taskfile.dev) runner | `Taskfile.yml` in current directory |
 
-Task runner commands are sent to the parent pane (the terminal that launched nunchux).
+### Taskrunner Window Behavior
+
+Task runner commands run in dedicated tmux windows (not popups):
+
+- **Primary action** (Enter): Runs task in a background window, you stay in current window
+- **Secondary action** (Ctrl-O): Runs task and switches to that window
+- **Ctrl-X**: Kills the task's window
+
+Window titles show the task name and status: `just » build 🔄` (running), `just » build ✅` (success), `just » build ❌` (failed).
+
+Re-running the same task reuses its existing window instead of creating a new one.
+
+### Taskrunner Status Icons
+
+Use the `[taskrunner]` section (without a name) to configure status icons globally:
+
+```ini
+[taskrunner]
+icon_running = 🔄
+icon_success = ✅
+icon_failed = ❌
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `icon_running` | `🔄` | Icon while task is running |
+| `icon_success` | `✅` | Icon when task completes successfully |
+| `icon_failed` | `❌` | Icon when task fails |
+
+Example with nerd fonts:
+```ini
+[taskrunner]
+icon_running =
+icon_success =
+icon_failed =
+```

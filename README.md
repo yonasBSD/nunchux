@@ -14,17 +14,23 @@ running. No more hunting through tmux windows to find where you left lazygit.
 * Kill running apps with Ctrl-X
 * Dynamic status info (git changes, docker containers, system load, etc.)
 
-### Plugin integrations
+### Task runner integrations
 
-Nunchux has a plugin system for task runners. Plugins auto-detect when the
-relevant tool is available and show tasks right in the menu. Select one and it
-runs in your current pane.
+Nunchux has built-in task runners that auto-detect project tools and show tasks
+right in the menu. Tasks run in dedicated tmux windows with status indicators:
 
-Built-in plugins:
+* `just » build 🔄` - running
+* `just » build ✅` - completed successfully
+* `just » build ❌` - failed
+
+Built-in task runners:
 
 * **just** - Justfile recipes (requires [just](https://github.com/casey/just))
 * **npm** - package.json scripts (requires npm)
 * **task** - Taskfile tasks (requires [task](https://taskfile.dev/) or go-task)
+
+Task runners are disabled by default. Enable them in your config and they'll
+appear when the relevant files are detected (justfile, package.json, Taskfile.yml).
 
 ## What it looks like
 
