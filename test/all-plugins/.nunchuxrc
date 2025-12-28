@@ -41,6 +41,11 @@ depth = 2
 sort = modified-folder
 cache_ttl = 300
 
+[taskrunner]
+icon_running = 
+icon_success = 
+icon_failed = 
+
 # Task runners (all enabled for testing)
 [taskrunner:just]
 enabled = true

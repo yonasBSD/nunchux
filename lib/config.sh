@@ -26,6 +26,11 @@ MENU_CACHE_TTL="${MENU_CACHE_TTL:-60}"
 PRIMARY_KEY="${PRIMARY_KEY:-enter}"
 SECONDARY_KEY="${SECONDARY_KEY:-ctrl-o}"
 
+# Taskrunner icons
+TASKRUNNER_ICON_RUNNING="${TASKRUNNER_ICON_RUNNING:-🔄}"
+TASKRUNNER_ICON_SUCCESS="${TASKRUNNER_ICON_SUCCESS:-✅}"
+TASKRUNNER_ICON_FAILED="${TASKRUNNER_ICON_FAILED:-❌}"
+
 # Supported fzf keys (shift-enter and ctrl-enter are NOT supported by terminals)
 FZF_SUPPORTED_KEYS=(
     # Basic keys
@@ -235,6 +240,13 @@ parse_config() {
                     exclude_patterns) EXCLUDE_PATTERNS="$value" ;;
                     primary_key) PRIMARY_KEY="$value" ;;
                     secondary_key) SECONDARY_KEY="$value" ;;
+                esac
+            elif [[ "$current_section" == "taskrunner" ]]; then
+                # Handle taskrunner defaults
+                case "$key" in
+                    icon_running) TASKRUNNER_ICON_RUNNING="$value" ;;
+                    icon_success) TASKRUNNER_ICON_SUCCESS="$value" ;;
+                    icon_failed) TASKRUNNER_ICON_FAILED="$value" ;;
                 esac
             else
                 # Store in section_data for module handler

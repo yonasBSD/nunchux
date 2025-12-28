@@ -7,7 +7,7 @@ hello:
 # Build something
 build:
     echo "Building..."
-    sleep 1
+    sleep 10
     echo "Done!"
 
 # Run tests
@@ -18,3 +18,8 @@ test:
 # Clean up
 clean:
     echo "Cleaning..."
+
+# This task fails
+fail:
+    echo "About to fail..."
+    exit 1

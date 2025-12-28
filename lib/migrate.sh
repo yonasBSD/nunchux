@@ -19,8 +19,8 @@ is_old_config_format() {
     while IFS= read -r line; do
         if [[ "$line" =~ ^\[([^\]]+)\]$ ]]; then
             local section="${BASH_REMATCH[1]}"
-            # Skip settings
-            [[ "$section" == "settings" ]] && continue
+            # Skip special global sections
+            [[ "$section" == "settings" || "$section" == "taskrunner" ]] && continue
             # If section doesn't have a colon, it's old format
             if [[ "$section" != *:* ]]; then
                 return 0

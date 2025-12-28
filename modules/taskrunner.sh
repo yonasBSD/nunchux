@@ -210,9 +210,9 @@ taskrunner_launch() {
     local full_cmd="$cmd"'
 exit_code=$?
 if [[ $exit_code -eq 0 ]]; then
-    tmux rename-window -t "$TMUX_PANE" "✓ '"$task_name"'"
+    tmux rename-window -t "$TMUX_PANE" "'"$TASKRUNNER_ICON_SUCCESS"' '"$task_name"'"
 else
-    tmux rename-window -t "$TMUX_PANE" "✗ '"$task_name"'"
+    tmux rename-window -t "$TMUX_PANE" "'"$TASKRUNNER_ICON_FAILED"' '"$task_name"'"
 fi
 echo
 echo "Press any key to close..."
@@ -228,7 +228,7 @@ read -n 1 -s'
 
     if [[ -n "$existing_window" ]]; then
         # Reuse existing window - rename and respawn
-        tmux rename-window -t "$existing_window" "⏳ $task_name"
+        tmux rename-window -t "$existing_window" "$TASKRUNNER_ICON_RUNNING $task_name"
         tmux respawn-window -k -t "$existing_window" -c "$dir" bash -c "$full_cmd"
         if [[ "$key" == "$SECONDARY_KEY" ]]; then
             tmux select-window -t "$existing_window"
@@ -239,9 +239,9 @@ read -n 1 -s'
     else
         # Create new window
         if [[ "$key" == "$SECONDARY_KEY" ]]; then
-            tmux new-window -n "⏳ $task_name" -c "$dir" bash -c "$full_cmd"
+            tmux new-window -n "$TASKRUNNER_ICON_RUNNING $task_name" -c "$dir" bash -c "$full_cmd"
         else
-            tmux new-window -d -n "⏳ $task_name" -c "$dir" bash -c "$full_cmd"
+            tmux new-window -d -n "$TASKRUNNER_ICON_RUNNING $task_name" -c "$dir" bash -c "$full_cmd"
         fi
     fi
 
