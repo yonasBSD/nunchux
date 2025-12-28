@@ -183,3 +183,95 @@ EOF
     run build_combined_menu ""
     assert_output_contains "TESTICON"
 }
+
+# =============================================================================
+# Taskrunner Status Icon Configuration Tests
+# =============================================================================
+
+@test "taskrunner: default status icons are emojis" {
+    source "$NUNCHUX_ROOT/lib/config.sh"
+
+    [[ "$TASKRUNNER_ICON_RUNNING" == "🔄" ]]
+    [[ "$TASKRUNNER_ICON_SUCCESS" == "✅" ]]
+    [[ "$TASKRUNNER_ICON_FAILED" == "❌" ]]
+}
+
+@test "taskrunner: [taskrunner] section configures icon_running" {
+    create_test_config "$TEMP_DIR/test" "[taskrunner]
+icon_running = RUNNING"
+
+    cd "$TEMP_DIR/test"
+    load_and_parse_config
+
+    [[ "$TASKRUNNER_ICON_RUNNING" == "RUNNING" ]]
+}
+
+@test "taskrunner: [taskrunner] section configures icon_success" {
+    create_test_config "$TEMP_DIR/test" "[taskrunner]
+icon_success = SUCCESS"
+
+    cd "$TEMP_DIR/test"
+    load_and_parse_config
+
+    [[ "$TASKRUNNER_ICON_SUCCESS" == "SUCCESS" ]]
+}
+
+@test "taskrunner: [taskrunner] section configures icon_failed" {
+    create_test_config "$TEMP_DIR/test" "[taskrunner]
+icon_failed = FAILED"
+
+    cd "$TEMP_DIR/test"
+    load_and_parse_config
+
+    [[ "$TASKRUNNER_ICON_FAILED" == "FAILED" ]]
+}
+
+@test "taskrunner: [taskrunner] section configures all icons together" {
+    create_test_config "$TEMP_DIR/test" "[taskrunner]
+icon_running = R
+icon_success = S
+icon_failed = F"
+
+    cd "$TEMP_DIR/test"
+    load_and_parse_config
+
+    [[ "$TASKRUNNER_ICON_RUNNING" == "R" ]]
+    [[ "$TASKRUNNER_ICON_SUCCESS" == "S" ]]
+    [[ "$TASKRUNNER_ICON_FAILED" == "F" ]]
+}
+
+@test "taskrunner: [taskrunner] section not detected as old format" {
+    create_test_config "$TEMP_DIR/test" "[settings]
+menu_width = 50%
+
+[taskrunner]
+icon_running = TEST
+
+[app:myapp]
+cmd = echo hello"
+
+    cd "$TEMP_DIR/test"
+    local config_file="$TEMP_DIR/test/.nunchuxrc"
+
+    # Should NOT be detected as old format
+    run is_old_config_format "$config_file"
+    [[ "$status" -eq 1 ]]
+}
+
+# =============================================================================
+# Taskrunner Kill Function Tests
+# =============================================================================
+
+@test "taskrunner: taskrunner_kill returns 1 for non-taskrunner name" {
+    load_modules
+
+    run taskrunner_kill "lazygit"
+    [[ "$status" -eq 1 ]]
+}
+
+@test "taskrunner: taskrunner_kill returns 1 for app-style name" {
+    load_modules
+
+    run taskrunner_kill "myapp"
+    [[ "$status" -eq 1 ]]
+}
