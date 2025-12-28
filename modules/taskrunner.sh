@@ -198,17 +198,23 @@ taskrunner_launch() {
 
     $is_runner || return 1
 
-    # Taskrunner items run in the parent pane (not the popup)
-    local target_pane="${NUNCHUX_PARENT_PANE:-}"
+    # Get task name for window/popup title
+    local task_name="${name#*:}"
+    local dir
+    dir=$(get_current_dir)
 
-    # Try tmux environment if shell env is empty
-    [[ -z "$target_pane" ]] && target_pane=$(tmux show-environment NUNCHUX_PARENT_PANE 2>/dev/null | cut -d= -f2)
+    # Wrap command to wait for keypress after completion
+    local wait_cmd='echo; echo "Press any key to close..."; read -n 1 -s'
 
-    if [[ -n "$target_pane" ]]; then
-        tmux send-keys -t "$target_pane" "$cmd" Enter
+    if [[ "$key" == "$SECONDARY_KEY" ]]; then
+        # Secondary action: open in window
+        tmux new-window -n "$task_name" -c "$dir" bash -c "$cmd; $wait_cmd"
     else
-        # Fallback if not running in popup
-        tmux send-keys "$cmd" Enter
+        # Primary action: open in popup
+        local width="${APP_POPUP_WIDTH}"
+        local height="${APP_POPUP_HEIGHT}"
+        tmux display-popup -E -b rounded -T " $task_name " -w "$width" -h "$height" -d "$dir" bash -c "$cmd; $wait_cmd"
+        exit 0
     fi
 
     return 0
