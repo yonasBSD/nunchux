@@ -14,7 +14,9 @@ secondary_key = tab
 # Apps
 [app:lazygit]
 cmd = lazygit
-desc = Git TUI
+desc = prim = window, sec = popup
+primary_action = window
+secondary_action = popup
 status = n=$(git status -s 2>/dev/null | wc -l | tr -d ' '); [[ $n -gt 0 ]] && echo "($n changed)"
 
 [app:htop]
