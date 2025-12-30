@@ -9,56 +9,56 @@
 # 4. Runs the command (or just applies env if sourced)
 #
 # Usage:
-#   nunchux-run <command> [args...]   - Run command with inherited env
-#   source nunchux-run                - Just apply env (for complex scripts)
+#    nunchux-run <command> [args...]   - Run command with inherited env
+#    source nunchux-run                - Just apply env (for complex scripts)
 #
 # The env file path is obtained automatically from tmux environment.
 # If no env file is available, gracefully continues without it.
 
 # Apply parent environment from tmux's NUNCHUX_ENV_FILE
 _nunchux_apply_env() {
-    local env_file
+  local env_file
 
-    # Get env file path from tmux environment (set by keybinding)
-    env_file=$(tmux show-environment NUNCHUX_ENV_FILE 2>/dev/null | cut -d= -f2)
+  # Get env file path from tmux environment (set by keybinding)
+  env_file=$(tmux show-environment NUNCHUX_ENV_FILE 2>/dev/null | cut -d= -f2)
 
-    if [[ -z "$env_file" || ! -r "$env_file" ]]; then
-        return 0  # No env file available, continue without it
-    fi
+  if [[ -z "$env_file" || ! -r "$env_file" ]]; then
+    return 0 # No env file available, continue without it
+  fi
 
-    # Read and apply environment, filtering problematic variables
-    while IFS='=' read -r name value; do
-        # Skip empty lines
-        [[ -z "$name" ]] && continue
+  # Read and apply environment, filtering problematic variables
+  while IFS='=' read -r name value; do
+    # Skip empty lines
+    [[ -z "$name" ]] && continue
 
-        # Skip variables that could cause issues
-        case "$name" in
-            # Bash internal variables
-            BASH*|SHELLOPTS|BASHOPTS|FUNCNAME|GROUPS|DIRSTACK)
-                continue ;;
-            # Process/shell state
-            EUID|UID|PPID|SHELL|SHLVL|_|PWD|OLDPWD)
-                continue ;;
-            # Tmux internal variables
-            TMUX|TMUX_PANE|TERM)
-                continue ;;
-        esac
+    # Skip variables that could cause issues
+    case "$name" in
+    # Bash internal variables
+    BASH* | SHELLOPTS | BASHOPTS | FUNCNAME | GROUPS | DIRSTACK)
+      continue
+      ;;
+    # Process/shell state
+    EUID | UID | PPID | SHELL | SHLVL | _ | PWD | OLDPWD)
+      continue
+      ;;
+    # Tmux internal variables
+    TMUX | TMUX_PANE | TERM)
+      continue
+      ;;
+    esac
 
-        # Export the variable
-        export "$name=$value"
-    done < "$env_file"
-
-    # Clean up the env file (one-time use)
-    rm -f "$env_file" 2>/dev/null || true
+    # Export the variable
+    export "$name=$value"
+  done <"$env_file"
 }
 
 # Detect if we're being sourced or executed
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    # Executed directly: apply env and run command
-    set -euo pipefail
-    _nunchux_apply_env
-    exec "$@"
+  # Executed directly: apply env and run command
+  set -euo pipefail
+  _nunchux_apply_env
+  exec "$@"
 else
-    # Sourced: just apply env
-    _nunchux_apply_env
+  # Sourced: just apply env
+  _nunchux_apply_env
 fi
