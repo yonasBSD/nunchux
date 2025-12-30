@@ -183,6 +183,44 @@ cmd = nvtop
 desc = GPU monitoring
 ```
 
+## Configuring Actions
+
+Control how items open with `primary_action` and `secondary_action`:
+
+### Always open lazygit in a window
+
+```ini
+[app:git]
+cmd = lazygit
+primary_action = window  # Never use popup for lazygit
+```
+
+### Run npm tasks in the background by default
+
+```ini
+[taskrunner:npm]
+enabled = true
+primary_action = background_window  # Stay in current pane
+secondary_action = window           # Ctrl-O to switch to task window
+```
+
+### Open files from dirbrowser in windows
+
+```ini
+[dirbrowser:configs]
+directory = ~/.config
+primary_action = window  # Enter opens in window
+secondary_action = popup # Ctrl-O opens in popup
+```
+
+### Set global defaults
+
+```ini
+[settings]
+primary_action = window          # All items open in windows by default
+secondary_action = background_window
+```
+
 ## Task Runners
 
 Enable task runners to show project tasks in the menu:

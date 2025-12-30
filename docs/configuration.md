@@ -49,6 +49,10 @@ The `[settings]` section controls global behavior:
 | `menu_height` | `50%` | Height of the app selector menu |
 | `popup_width` | `90%` | Default width for app popups |
 | `popup_height` | `90%` | Default height for app popups |
+| `primary_key` | `enter` | Key for primary action |
+| `secondary_key` | `ctrl-o` | Key for secondary action |
+| `primary_action` | `popup` | Default primary action (see below) |
+| `secondary_action` | `window` | Default secondary action (see below) |
 | `fzf_prompt` | ` ` | Prompt shown in fzf |
 | `fzf_pointer` | `▶` | Pointer for selected item |
 | `fzf_border` | `rounded` | Border style (`rounded`, `sharp`, `double`, etc.) |
@@ -56,8 +60,24 @@ The `[settings]` section controls global behavior:
 | `fzf_colors` | (see below) | fzf color scheme |
 | `cache_ttl` | `60` | Seconds before cache refresh (0 to disable) |
 | `exclude_patterns` | (see below) | Patterns to exclude from directory browsers |
-| `primary_key` | `enter` | Key for primary action (popup/edit) |
-| `secondary_key` | `ctrl-o` | Key for secondary action (window) |
+
+### Action Types
+
+| Action | Description |
+|--------|-------------|
+| `popup` | Open in a tmux popup overlay |
+| `window` | Open in a new tmux window with focus |
+| `background_window` | Open in a new tmux window, stay in current pane |
+
+Different item types have different default actions:
+
+| Type | Primary Default | Secondary Default |
+|------|-----------------|-------------------|
+| Apps | `popup` | `window` |
+| Taskrunners | `window` | `background_window` |
+| Dirbrowsers | `popup` | `window` |
+
+You can override the default actions globally in `[settings]`, or per-item.
 
 ### Default fzf_colors
 
@@ -115,6 +135,8 @@ on_exit = echo "done"
 | `status` | No | Shell command for dynamic status text |
 | `status_script` | No | Path to script for complex status |
 | `on_exit` | No | Command to run after app exits |
+| `primary_action` | No | Override primary action for this app |
+| `secondary_action` | No | Override secondary action for this app |
 | `order` | No | Explicit sort order (lower = first) |
 
 ### Variables in cmd and on_exit
@@ -146,6 +168,7 @@ desc = Disk usage
 The `[menu:system]` appears in the main menu. Selecting it opens a submenu with its children.
 
 Menu sections support:
+
 - `status` - Dynamic status text
 - `desc` - Description
 - `cache_ttl` - Override cache duration for this submenu
@@ -177,6 +200,8 @@ height = 80
 | `cache_ttl` | `300` | Cache duration in seconds |
 | `width` | `90` | Popup width |
 | `height` | `80` | Popup height |
+| `primary_action` | `popup` | Override primary action |
+| `secondary_action` | `window` | Override secondary action |
 | `order` | (none) | Explicit sort order (lower = first) |
 
 ### Sort Modes
@@ -213,6 +238,8 @@ Task runners are **disabled by default** and must be explicitly enabled.
 | `enabled` | `false` | Whether to show this task runner |
 | `icon` | (runner default) | Icon shown in divider line |
 | `label` | (runner name) | Label shown in menu |
+| `primary_action` | `window` | Override primary action |
+| `secondary_action` | `background_window` | Override secondary action |
 | `order` | (none) | Explicit sort order (lower = first) |
 
 ### Available Task Runners
@@ -225,15 +252,27 @@ Task runners are **disabled by default** and must be explicitly enabled.
 
 ### Taskrunner Window Behavior
 
-Task runner commands run in dedicated tmux windows (not popups):
+Task runner commands run in dedicated tmux windows (not popups by default):
 
-- **Primary action** (Enter): Runs task in a background window, you stay in current window
-- **Secondary action** (Ctrl-O): Runs task and switches to that window
+- **Primary action** (Enter): Runs task and switches to its window
+- **Secondary action** (Ctrl-O): Runs task in background, stay in current pane
 - **Ctrl-X**: Kills the task's window
 
-Window titles show the task name and status: `just » build 🔄` (running), `just » build ✅` (success), `just » build ❌` (failed).
+Window titles show the task name and status:
+
+- `just » build 🔄` (running)
+- `just » build ✅` (success)
+- `just » build ❌` (failed)
 
 Re-running the same task reuses its existing window instead of creating a new one.
+
+You can change this behavior per-taskrunner:
+
+```ini
+[taskrunner:npm]
+enabled = true
+primary_action = popup  # Run npm tasks in a popup instead
+```
 
 ### Taskrunner Status Icons
 
@@ -252,12 +291,6 @@ icon_failed = ❌
 | `icon_success` | `✅` | Icon when task completes successfully |
 | `icon_failed` | `❌` | Icon when task fails |
 
-Example with nerd fonts:
-```ini
-[taskrunner]
-icon_running =
-icon_success =
-icon_failed =
-```
+This is useful if you prefer icons from the nerd font you are using.
 
-<!-- vim: ft=markdown ts=2 sw=2 et -->
+<!-- vim: ft=markdown ts=2 sw=2 et: -->

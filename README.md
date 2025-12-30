@@ -9,7 +9,7 @@ Launch your apps in popups or windows, and switch to them if they're already
 running. No more hunting through tmux windows to find where you left lazygit.
 
 * Show running status for each app (● running, ○ stopped)
-* Open apps in popups (Enter) or windows (Ctrl-O)
+* Configurable actions: open in popup, window, or background window
 * Switch to running apps instead of opening duplicates
 * Kill running apps with Ctrl-X
 * Dynamic status info (git changes, docker containers, system load, etc.)
@@ -85,6 +85,8 @@ menu_width = 60%
 menu_height = 50%
 popup_width = 90%
 popup_height = 90%
+primary_action = popup
+secondary_action = window
 
 [app:btop]
 cmd = btop
@@ -92,6 +94,7 @@ status = load=$(cut -d' ' -f1 /proc/loadavg); echo "load: $load"
 
 [app:git]
 cmd = lazygit
+primary_action = window   # Always open lazygit in a window
 status = n=$(git status -s 2>/dev/null | wc -l); [[ $n -gt 0 ]] && echo "($n changed)"
 
 [app:docker]
@@ -108,6 +111,7 @@ enabled = true
 
 [taskrunner:npm]
 enabled = true
+primary_action = background_window  # Run npm tasks in background
 ```
 
 ### Available options
@@ -118,7 +122,15 @@ In `[settings]`:
 * `menu_width` / `menu_height` - dimensions for the nunchux menu popup
 * `popup_width` / `popup_height` - default dimensions for app popups
 * `primary_key` / `secondary_key` - keybindings (default: enter/ctrl-o)
+* `primary_action` / `secondary_action` - what happens on keypress (see below)
 * `fzf_*` - customize fzf appearance
+
+**Action types:** `popup` (tmux popup), `window` (new window with focus), `background_window` (new window, stay in current pane)
+
+Default actions by type:
+* Apps: `popup` / `window`
+* Taskrunners: `window` / `background_window`
+* Dirbrowsers: `popup` / `window`
 
 Per app (`[app:name]`):
 
@@ -127,6 +139,7 @@ Per app (`[app:name]`):
 * `width` / `height` - popup dimensions for this app
 * `status` - shell command for dynamic status
 * `status_script` - path to script for complex status
+* `primary_action` / `secondary_action` - override global action for this app
 
 ### Line continuation
 

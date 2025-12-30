@@ -41,7 +41,26 @@ cache_ttl = 60
 #
 # Set to 0 to disable caching entirely for that menu.
 
+# Actions
+# -------
+# Control what happens when you press primary_key (Enter) or secondary_key (Ctrl-O).
+#
+# Available actions:
+#   popup             - Open in a tmux popup overlay
+#   window            - Open in a new tmux window with focus
+#   background_window - Open in a new tmux window, stay in current pane
+#
+# Default actions vary by item type:
+#   Apps:        popup / window
+#   Taskrunners: window / background_window
+#   Dirbrowsers: popup / window
+#
+# You can set global defaults here, or override per-item with primary_action/secondary_action.
+#
+# primary_action = popup
+# secondary_action = window
 # exclude_patterns (for directory browsers)
+
 # ------------------------------------------
 # Comma-separated list of patterns to exclude from directory browsers.
 # - Patterns starting with * are filename globs (e.g., *.log, *.db)
@@ -72,14 +91,16 @@ cache_ttl = 60
 # Use [app:name] sections. The name becomes the window name.
 #
 # Available options:
-#   cmd           = command to run (required)
-#   desc          = description shown in menu
-#   width         = popup width (e.g., 80 or 80%)
-#   height        = popup height
-#   status        = shell command for dynamic status
-#   status_script = path to script for complex status
-#   on_exit       = command to run after app exits
-#   order         = explicit sort order (lower = first)
+#   cmd              = command to run (required)
+#   desc             = description shown in menu
+#   width            = popup width (e.g., 80 or 80%)
+#   height           = popup height
+#   status           = shell command for dynamic status
+#   status_script    = path to script for complex status
+#   on_exit          = command to run after app exits
+#   primary_action   = override primary action (popup/window/background_window)
+#   secondary_action = override secondary action
+#   order            = explicit sort order (lower = first)
 #
 # Variables available in cmd and on_exit:
 #   {pane_id}     = parent tmux pane ID
@@ -171,15 +192,17 @@ status = n=$(docker ps -q 2>/dev/null | wc -l | tr -d ' '); [[ $n -gt 0 ]] && ec
 # Selected files open in $VISUAL, $EDITOR, or nvim (in that order).
 #
 # Available options:
-#   directory      = path to browse (required)
-#   depth          = how many levels deep to search (default: 1)
-#   sort           = sorting mode: "modified", "modified-folder", or "alphabetical"
-#   sort_direction = "ascending" or "descending" (default: descending)
-#   cache_ttl      = cache duration in seconds (default: 300)
-#   glob           = filter files by pattern (e.g., "*.conf")
-#   width          = popup width
-#   height         = popup height
-#   order          = explicit sort order (lower = first)
+#   directory        = path to browse (required)
+#   depth            = how many levels deep to search (default: 1)
+#   sort             = sorting mode: "modified", "modified-folder", or "alphabetical"
+#   sort_direction   = "ascending" or "descending" (default: descending)
+#   cache_ttl        = cache duration in seconds (default: 300)
+#   glob             = filter files by pattern (e.g., "*.conf")
+#   width            = popup width
+#   height           = popup height
+#   primary_action   = override primary action (default: popup)
+#   secondary_action = override secondary action (default: window)
+#   order            = explicit sort order (lower = first)
 #
 # Sort modes:
 #   modified        = newest files first
@@ -196,13 +219,18 @@ status = n=$(docker ps -q 2>/dev/null | wc -l | tr -d ' '); [[ $n -gt 0 ]] && ec
 # ------------
 # Use [taskrunner:name] to enable task runner integrations.
 # Task runners are DISABLED by default - you must explicitly enable them.
-# Commands are sent to the parent pane (where you launched nunchux).
+# Tasks run in dedicated tmux windows with status indicators.
 #
 # Available options:
-#   enabled = true/false (default: false)
-#   icon    = emoji icon shown in divider
-#   label   = custom label (default: runner name)
-#   order   = explicit sort order (lower = first)
+#   enabled          = true/false (default: false)
+#   icon             = emoji icon shown in divider
+#   label            = custom label (default: runner name)
+#   primary_action   = override primary action (default: window)
+#   secondary_action = override secondary action (default: background_window)
+#   order            = explicit sort order (lower = first)
+#
+# By default: Enter runs task and switches to its window,
+#             Ctrl-O runs task in background (stay in current pane)
 #
 # Available runners:
 #   just - shows recipes from justfile
