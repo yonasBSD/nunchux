@@ -1,20 +1,22 @@
-# Test config for environment variable inheritance
+# Test config for environment variable inheritance integration tests
 #
-# This config is used to test whether environment variables
-# from the parent shell are passed to popup windows.
+# These apps are designed for automated testing - they write env to files
+# and exit without waiting for user input.
+#
+# The test script sets NUNCHUX_TEST_ID before running these apps.
 
 [settings]
-popup_width = 80%
-popup_height = 60%
+popup_width = 50%
+popup_height = 50%
 
-# App that prints env vars and waits for keypress
-[app:printenv]
-cmd = bash -c 'echo "=== Environment Test ===" && echo "" && echo "Looking for NUNCHUX_TEST_VAR..." && echo "" && if [ -n "$NUNCHUX_TEST_VAR" ]; then echo "✅ FOUND: NUNCHUX_TEST_VAR=$NUNCHUX_TEST_VAR"; else echo "❌ NOT FOUND: NUNCHUX_TEST_VAR is not set"; fi && echo "" && echo "Looking for PATH containing /fake/nvm/path..." && echo "" && if echo "$PATH" | grep -q "/fake/nvm/path"; then echo "✅ FOUND: PATH contains /fake/nvm/path"; else echo "❌ NOT FOUND: PATH does not contain /fake/nvm/path"; fi && echo "" && echo "Press any key to close..." && read -n1'
-desc = Print environment variables
+# Test app for popup mode - writes env to file and exits quickly
+[app:env-popup]
+cmd = bash -c 'env | sort > /tmp/nunchux-integration-popup'
+desc = Popup env test (writes to /tmp)
 
-# App that writes env to a file (for automated testing)
-[app:envdump]
-cmd = bash -c 'env | sort > /tmp/nunchux-env-test-output && echo "Environment written to /tmp/nunchux-env-test-output" && echo "Press any key..." && read -n1'
-desc = Dump env to file
+# Test app for window mode - writes env to file, sleeps briefly for verification
+[app:env-window]
+cmd = bash -c 'env | sort > /tmp/nunchux-integration-window && sleep 2'
+desc = Window env test (writes to /tmp)
 
 # vim: ft=dosini ts=2 sw=2 et
