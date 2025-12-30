@@ -293,4 +293,4 @@ icon_failed = ❌
 
 This is useful if you prefer icons from the nerd font you are using.
 
-<!-- vim: ft=markdown ts=2 sw=2 et: -->
+<!-- vim: set ft=markdown ts=2 sw=2 et: -->

@@ -128,6 +128,7 @@ In `[settings]`:
 **Action types:** `popup` (tmux popup), `window` (new window with focus), `background_window` (new window, stay in current pane)
 
 Default actions by type:
+
 * Apps: `popup` / `window`
 * Taskrunners: `window` / `background_window`
 * Dirbrowsers: `popup` / `window`
@@ -224,4 +225,4 @@ This saves your environment after each command, so apps launched from nunchux
 * just (for justfile runner)
 * task or go-task (for Taskfile runner)
 
-<!-- vim: ft=markdown ts=2 sw=2 et -->
+<!-- vim: set ft=markdown ts=2 sw=2 et : -->

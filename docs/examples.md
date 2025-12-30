@@ -279,4 +279,4 @@ cmd = reddix            # https://github.com/darkhz/reddix
 desc = Down the rabbit hole
 ```
 
-<!-- vim: ft=markdown ts=2 sw=2 et -->
+<!-- vim: set ft=markdown ts=2 sw=2 et: -->
