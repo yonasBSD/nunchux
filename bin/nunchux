@@ -13,50 +13,50 @@ set -euo pipefail
 
 # Error handler - show Chuck Norris error screen and wait
 show_error_screen() {
-    local line="$1"
-    local cmd="$2"
+  local line="$1"
+  local cmd="$2"
 
-    clear
+  clear
 
-    # Center text helper
-    center() {
-        local text="$1"
-        local width=$(tput cols)
-        local plain=$(echo -e "$text" | sed 's/\x1b\[[0-9;]*m//g')
-        local text_len=${#plain}
-        local padding=$(( (width - text_len) / 2 ))
-        [[ $padding -gt 0 ]] && printf "%*s" $padding ""
-        echo -e "$text"
-    }
+  # Center text helper
+  center() {
+    local text="$1"
+    local width=$(tput cols)
+    local plain=$(echo -e "$text" | sed 's/\x1b\[[0-9;]*m//g')
+    local text_len=${#plain}
+    local padding=$(((width - text_len) / 2))
+    [[ $padding -gt 0 ]] && printf "%*s" $padding ""
+    echo -e "$text"
+  }
 
-    local height=$(tput lines)
-    local top_padding=$(( (height - 20) / 2 ))
-    for ((i=0; i<top_padding; i++)); do echo; done
+  local height=$(tput lines)
+  local top_padding=$(((height - 20) / 2))
+  for ((i = 0; i < top_padding; i++)); do echo; done
 
-    center "\033[1;33mChuck Norris can divide by zero\033[0m"
-    echo ""
-    center "\033[90mbut...\033[0m"
-    echo ""
+  center "\033[1;33mChuck Norris can divide by zero\033[0m"
+  echo ""
+  center "\033[90mbut...\033[0m"
+  echo ""
 
-    # Nunchucks ASCII art
-    local art='   ____
+  # Nunchucks ASCII art
+  local art='   ____
   |    |
   |    |===={####}
   |    |
   |____|'
-    while IFS= read -r artline; do
-        center "$artline"
-    done <<< "$art"
+  while IFS= read -r artline; do
+    center "$artline"
+  done <<<"$art"
 
-    echo ""
-    echo ""
-    center "\033[1;31mError on line $line\033[0m"
-    echo ""
-    center "\033[90m$cmd\033[0m"
-    echo ""
-    echo ""
-    center "\033[90mpress any key\033[0m"
-    read -n 1 -s
+  echo ""
+  echo ""
+  center "\033[1;31mError on line $line\033[0m"
+  echo ""
+  center "\033[90m$cmd\033[0m"
+  echo ""
+  echo ""
+  center "\033[90mpress any key\033[0m"
+  read -n 1 -s
 }
 
 trap 'show_error_screen "$LINENO" "$BASH_COMMAND"' ERR
@@ -79,49 +79,49 @@ check_and_migrate_config || exit 0
 # Load and parse config
 config_file=$(get_config_file)
 if [[ -n "$config_file" ]]; then
-    parse_config "$config_file"
+  parse_config "$config_file"
 fi
 
 # Show invalid keybinding error
 show_invalid_key_error() {
-    local invalid_key="$1"
-    clear
+  local invalid_key="$1"
+  clear
 
-    center() {
-        local text="$1"
-        local width=$(tput cols)
-        local plain=$(echo -e "$text" | sed 's/\x1b\[[0-9;]*m//g')
-        local text_len=${#plain}
-        local padding=$(( (width - text_len) / 2 ))
-        [[ $padding -gt 0 ]] && printf "%*s" $padding ""
-        echo -e "$text"
-    }
+  center() {
+    local text="$1"
+    local width=$(tput cols)
+    local plain=$(echo -e "$text" | sed 's/\x1b\[[0-9;]*m//g')
+    local text_len=${#plain}
+    local padding=$(((width - text_len) / 2))
+    [[ $padding -gt 0 ]] && printf "%*s" $padding ""
+    echo -e "$text"
+  }
 
-    local height=$(tput lines)
-    local top_padding=$(( (height - 24) / 2 ))
-    for ((i=0; i<top_padding; i++)); do echo; done
+  local height=$(tput lines)
+  local top_padding=$(((height - 24) / 2))
+  for ((i = 0; i < top_padding; i++)); do echo; done
 
-    center "\033[1;33mChuck Norris doesn't need keybindings\033[0m"
-    echo ""
-    center "\033[90mbut you do...\033[0m"
-    echo ""
-    while IFS= read -r line; do
-        center "$line"
-    done <<< "$NUNCHUCKS_ART"
-    echo ""
-    echo ""
-    center "\033[1;31mUnsupported key: $invalid_key\033[0m"
-    echo ""
-    center "\033[90mKeys like shift-enter and ctrl-enter are not supported by terminals.\033[0m"
-    echo ""
-    center "\033[1;37mGood alternatives:\033[0m"
-    center "alt-enter  ctrl-s  tab  ctrl-o"
-    echo ""
-    center "\033[90mSee: https://man.archlinux.org/man/fzf.1.en\033[0m"
-    echo ""
-    center "\033[90mpress any key\033[0m"
-    read -n 1 -s
-    exit 0  # Exit cleanly - user already saw the error
+  center "\033[1;33mChuck Norris doesn't need keybindings\033[0m"
+  echo ""
+  center "\033[90mbut you do...\033[0m"
+  echo ""
+  while IFS= read -r line; do
+    center "$line"
+  done <<<"$NUNCHUCKS_ART"
+  echo ""
+  echo ""
+  center "\033[1;31mUnsupported key: $invalid_key\033[0m"
+  echo ""
+  center "\033[90mKeys like shift-enter and ctrl-enter are not supported by terminals.\033[0m"
+  echo ""
+  center "\033[1;37mGood alternatives:\033[0m"
+  center "alt-enter  ctrl-s  tab  ctrl-o"
+  echo ""
+  center "\033[90mSee: https://man.archlinux.org/man/fzf.1.en\033[0m"
+  echo ""
+  center "\033[90mpress any key\033[0m"
+  read -n 1 -s
+  exit 0 # Exit cleanly - user already saw the error
 }
 
 # Validate keybindings before proceeding
@@ -132,16 +132,16 @@ load_taskrunners
 
 # Check if any items are configured
 has_config() {
-    app_has_items || menu_has_items || dirbrowser_has_items || taskrunner_has_items
+  app_has_items || menu_has_items || dirbrowser_has_items || taskrunner_has_items
 }
 
 # No config popup - offers to create initial config
 show_no_config_popup() {
-    local script_file="/tmp/nunchux-noconfig-$$"
-    local config_dir="$NUNCHUX_CONFIG_DIR"
-    local config_file="$NUNCHUX_RC_FILE"
+  local script_file="/tmp/nunchux-noconfig-$$"
+  local config_dir="$NUNCHUX_CONFIG_DIR"
+  local config_file="$NUNCHUX_RC_FILE"
 
-    cat > "$script_file" << 'NOCONFIG_EOF'
+  cat >"$script_file" <<'NOCONFIG_EOF'
 #!/usr/bin/env bash
 CONFIG_DIR="$1"
 CONFIG_FILE="$2"
@@ -168,12 +168,12 @@ show_menu() {
     echo ""
 NOCONFIG_EOF
 
-    # Append the nunchucks art
-    while IFS= read -r line; do
-        printf '    center "%s"\n' "$line" >> "$script_file"
-    done <<< "$NUNCHUCKS_ART"
+  # Append the nunchucks art
+  while IFS= read -r line; do
+    printf '    center "%s"\n' "$line" >>"$script_file"
+  done <<<"$NUNCHUCKS_ART"
 
-    cat >> "$script_file" << 'NOCONFIG_EOF2'
+  cat >>"$script_file" <<'NOCONFIG_EOF2'
     echo ""
     echo ""
     center "\033[1;32m[Enter]\033[0m \033[90mCreate config at $CONFIG_FILE\033[0m"
@@ -258,194 +258,194 @@ while true; do
 done
 NOCONFIG_EOF2
 
-    chmod +x "$script_file"
-    tmux display-popup -E -b rounded -w "$MENU_WIDTH" -h "$MENU_HEIGHT" "$script_file" "$config_dir" "$config_file"
-    exit 0
+  chmod +x "$script_file"
+  tmux display-popup -E -b rounded -w "$MENU_WIDTH" -h "$MENU_HEIGHT" "$script_file" "$config_dir" "$config_file"
+  exit 0
 }
 
 # Build combined menu
 build_menu() {
-    build_combined_menu "$CURRENT_MENU"
+  build_combined_menu "$CURRENT_MENU"
 }
 
 # Main launcher using fzf
 launch() {
-    # Check dependencies
-    if ! check_fzf_version; then
-        echo "Install fzf $FZF_MIN_VERSION+ from https://github.com/junegunn/fzf" >&2
-        exit 1
-    fi
+  # Check dependencies
+  if ! check_fzf_version; then
+    echo "Install fzf $FZF_MIN_VERSION+ from https://github.com/junegunn/fzf" >&2
+    exit 1
+  fi
 
-    if ! command -v tmux &>/dev/null; then
-        echo "Error: tmux is required." >&2
-        exit 1
-    fi
+  if ! command -v tmux &>/dev/null; then
+    echo "Error: tmux is required." >&2
+    exit 1
+  fi
 
-    if ! command -v curl &>/dev/null; then
-        echo "Error: curl is required for menu hot-swap." >&2
-        exit 1
-    fi
+  if ! command -v curl &>/dev/null; then
+    echo "Error: curl is required for menu hot-swap." >&2
+    exit 1
+  fi
 
-    if [[ -z "${TMUX:-}" ]]; then
-        echo "Error: Must be run inside tmux." >&2
-        exit 1
-    fi
+  if [[ -z "${TMUX:-}" ]]; then
+    echo "Error: Must be run inside tmux." >&2
+    exit 1
+  fi
 
-    # No config? Offer to create one
-    if ! has_config; then
-        if has_config_file; then
-            echo "Config file exists but has no items configured."
-            echo "Edit $NUNCHUX_RC_FILE to add your apps."
-            exit 0
-        else
-            show_no_config_popup
-        fi
-    fi
-
-    local selection
-    local script_path
-    script_path=$(realpath "$0")
-
-    # Build reload command with submenu context
-    local reload_cmd="$script_path --menu"
-    local primary_display="${PRIMARY_KEY^}"
-    local secondary_display="${SECONDARY_KEY^}"
-    local header="$primary_display: popup | $secondary_display: window | Ctrl-X: kill"
-
-    if [[ -n "$CURRENT_MENU" ]]; then
-        reload_cmd="$script_path --menu --submenu $CURRENT_MENU"
-        header="$primary_display: popup | $secondary_display: window | Ctrl-X: kill | Esc: back"
-    fi
-
-    # Cache settings
-    local cache_file socket cache_ttl
-    cache_ttl="$MENU_CACHE_TTL"
-
-    if [[ -z "$CURRENT_MENU" ]]; then
-        cache_file=$(cache_file "main-menu")
-        socket=$(cache_socket "main-menu")
+  # No config? Offer to create one
+  if ! has_config; then
+    if has_config_file; then
+      echo "Config file exists but has no items configured."
+      echo "Edit $NUNCHUX_RC_FILE to add your apps."
+      exit 0
     else
-        cache_file=$(cache_file "submenu" "$CURRENT_MENU")
-        socket=$(cache_socket "submenu" "$CURRENT_MENU")
-        cache_ttl="${SUBMENU_CACHE_TTL[$CURRENT_MENU]:-$MENU_CACHE_TTL}"
+      show_no_config_popup
     fi
+  fi
 
-    # Build fzf options
-    local fzf_opts
-    build_fzf_opts fzf_opts "$header"
-    fzf_opts+=(--bind="ctrl-x:reload($script_path --kill {2} >/dev/null 2>&1; $reload_cmd)")
+  local selection
+  local script_path
+  script_path=$(realpath "$0")
 
-    # Run with cache if valid
-    local fzf_exit=0
-    local fzf_stderr="/tmp/nunchux-fzf-stderr-$$"
-    if is_cache_valid "$cache_file" "$cache_ttl"; then
-        refresh_cache "$cache_file" "$socket" build_menu &
-        local refresh_pid=$!
-        selection=$(cat "$cache_file" | fzf "${fzf_opts[@]}" --listen "$socket" 2>"$fzf_stderr") || fzf_exit=$?
-        kill $refresh_pid 2>/dev/null || true
-        rm -f "$socket" 2>/dev/null || true
-    else
-        selection=$(build_menu | tee "$cache_file" | fzf "${fzf_opts[@]}" 2>"$fzf_stderr") || fzf_exit=$?
+  # Build reload command with submenu context
+  local reload_cmd="$script_path --menu"
+  local primary_display="${PRIMARY_KEY^}"
+  local secondary_display="${SECONDARY_KEY^}"
+  local header="$primary_display: popup | $secondary_display: window | Ctrl-X: kill"
+
+  if [[ -n "$CURRENT_MENU" ]]; then
+    reload_cmd="$script_path --menu --submenu $CURRENT_MENU"
+    header="$primary_display: popup | $secondary_display: window | Ctrl-X: kill | Esc: back"
+  fi
+
+  # Cache settings
+  local cache_file socket cache_ttl
+  cache_ttl="$MENU_CACHE_TTL"
+
+  if [[ -z "$CURRENT_MENU" ]]; then
+    cache_file=$(cache_file "main-menu")
+    socket=$(cache_socket "main-menu")
+  else
+    cache_file=$(cache_file "submenu" "$CURRENT_MENU")
+    socket=$(cache_socket "submenu" "$CURRENT_MENU")
+    cache_ttl="${SUBMENU_CACHE_TTL[$CURRENT_MENU]:-$MENU_CACHE_TTL}"
+  fi
+
+  # Build fzf options
+  local fzf_opts
+  build_fzf_opts fzf_opts "$header"
+  fzf_opts+=(--bind="ctrl-x:reload($script_path --kill {2} >/dev/null 2>&1; $reload_cmd)")
+
+  # Run with cache if valid
+  local fzf_exit=0
+  local fzf_stderr="/tmp/nunchux-fzf-stderr-$$"
+  if is_cache_valid "$cache_file" "$cache_ttl"; then
+    refresh_cache "$cache_file" "$socket" build_menu &
+    local refresh_pid=$!
+    selection=$(cat "$cache_file" | fzf "${fzf_opts[@]}" --listen "$socket" 2>"$fzf_stderr") || fzf_exit=$?
+    kill $refresh_pid 2>/dev/null || true
+    rm -f "$socket" 2>/dev/null || true
+  else
+    selection=$(build_menu | tee "$cache_file" | fzf "${fzf_opts[@]}" 2>"$fzf_stderr") || fzf_exit=$?
+  fi
+
+  # If fzf failed (not just cancelled), show error
+  if [[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]]; then
+    echo ""
+    echo "fzf exited with code $fzf_exit"
+    if [[ -s "$fzf_stderr" ]]; then
+      echo ""
+      echo "Error output:"
+      cat "$fzf_stderr"
     fi
-
-    # If fzf failed (not just cancelled), show error
-    if [[ $fzf_exit -ne 0 && $fzf_exit -ne 130 ]]; then
-        echo ""
-        echo "fzf exited with code $fzf_exit"
-        if [[ -s "$fzf_stderr" ]]; then
-            echo ""
-            echo "Error output:"
-            cat "$fzf_stderr"
-        fi
-        echo ""
-        echo "fzf options: ${fzf_opts[*]}"
-        echo ""
-        echo "Press any key..."
-        read -n 1 -s
-        rm -f "$fzf_stderr"
-        return 1
-    fi
+    echo ""
+    echo "fzf options: ${fzf_opts[*]}"
+    echo ""
+    echo "Press any key..."
+    read -n 1 -s
     rm -f "$fzf_stderr"
+    return 1
+  fi
+  rm -f "$fzf_stderr"
 
-    if [[ -z "$selection" ]]; then
-        return 0
-    fi
+  if [[ -z "$selection" ]]; then
+    return 0
+  fi
 
-    # Debug: log selection to temp file if NUNCHUX_DEBUG is set
-    if [[ -n "${NUNCHUX_DEBUG:-}" ]]; then
-        echo "=== $(date) ===" >> /tmp/nunchux-debug.log
-        echo "Raw selection:" >> /tmp/nunchux-debug.log
-        echo "$selection" | cat -A >> /tmp/nunchux-debug.log
-        echo "PRIMARY_KEY=$PRIMARY_KEY" >> /tmp/nunchux-debug.log
-        echo "SECONDARY_KEY=$SECONDARY_KEY" >> /tmp/nunchux-debug.log
-    fi
+  # Debug: log selection to temp file if NUNCHUX_DEBUG is set
+  if [[ -n "${NUNCHUX_DEBUG:-}" ]]; then
+    echo "=== $(date) ===" >>/tmp/nunchux-debug.log
+    echo "Raw selection:" >>/tmp/nunchux-debug.log
+    echo "$selection" | cat -A >>/tmp/nunchux-debug.log
+    echo "PRIMARY_KEY=$PRIMARY_KEY" >>/tmp/nunchux-debug.log
+    echo "SECONDARY_KEY=$SECONDARY_KEY" >>/tmp/nunchux-debug.log
+  fi
 
-    # Parse: first line is key pressed, rest is selection
-    local key selected_line
-    key=$(echo "$selection" | head -1)
-    selected_line=$(echo "$selection" | tail -1)
+  # Parse: first line is key pressed, rest is selection
+  local key selected_line
+  key=$(echo "$selection" | head -1)
+  selected_line=$(echo "$selection" | tail -1)
 
-    if [[ -n "${NUNCHUX_DEBUG:-}" ]]; then
-        echo "Parsed key: '$key'" >> /tmp/nunchux-debug.log
-        echo "Selected line: '$selected_line'" >> /tmp/nunchux-debug.log
-    fi
+  if [[ -n "${NUNCHUX_DEBUG:-}" ]]; then
+    echo "Parsed key: '$key'" >>/tmp/nunchux-debug.log
+    echo "Selected line: '$selected_line'" >>/tmp/nunchux-debug.log
+  fi
 
-    if [[ -z "$selected_line" ]]; then
-        return 0
-    fi
+  if [[ -z "$selected_line" ]]; then
+    return 0
+  fi
 
-    # Extract fields (tab-separated)
-    local name cmd width height on_exit
-    name=$(echo "$selected_line" | cut -f2)
-    cmd=$(echo "$selected_line" | cut -f3)
-    width=$(echo "$selected_line" | cut -f4)
-    height=$(echo "$selected_line" | cut -f5)
-    on_exit=$(echo "$selected_line" | cut -f6)
+  # Extract fields (tab-separated)
+  local name cmd width height on_exit
+  name=$(echo "$selected_line" | cut -f2)
+  cmd=$(echo "$selected_line" | cut -f3)
+  width=$(echo "$selected_line" | cut -f4)
+  height=$(echo "$selected_line" | cut -f5)
+  on_exit=$(echo "$selected_line" | cut -f6)
 
-    if [[ -z "$name" ]]; then
-        return 0
-    fi
+  if [[ -z "$name" ]]; then
+    return 0
+  fi
 
-    # Try each module until one handles it
-    local handled=false
-    for mod in "${LOADED_MODULES[@]}"; do
-        local launcher="${mod}_launch"
-        if [[ $(type -t "$launcher") == "function" ]]; then
-            local result=0
-            "$launcher" "$name" "$key" "$cmd" "$width" "$height" "$on_exit" || result=$?
+  # Try each module until one handles it
+  local handled=false
+  for mod in "${LOADED_MODULES[@]}"; do
+    local launcher="${mod}_launch"
+    if [[ $(type -t "$launcher") == "function" ]]; then
+      local result=0
+      "$launcher" "$name" "$key" "$cmd" "$width" "$height" "$on_exit" || result=$?
 
-            if [[ $result -eq 0 ]]; then
-                handled=true
-                # If menu module handled it, relaunch with new context
-                if [[ "$mod" == "menu" && -n "$CURRENT_MENU" ]]; then
-                    launch
-                fi
-                return 0
-            elif [[ $result -eq 2 ]]; then
-                handled=true
-                # Special return: go back to main menu
-                launch
-                return 0
-            fi
+      if [[ $result -eq 0 ]]; then
+        handled=true
+        # If menu module handled it, relaunch with new context
+        if [[ "$mod" == "menu" && -n "$CURRENT_MENU" ]]; then
+          launch
         fi
-    done
-
-    # If nothing handled the selection, show debug info
-    if [[ "$handled" == "false" ]]; then
-        echo ""
-        echo "No module handled this selection:"
-        echo "  name: $name"
-        echo "  key: '$key' (expected: '$PRIMARY_KEY' or '$SECONDARY_KEY')"
-        echo "  cmd: $cmd"
-        echo ""
-        echo "Press any key..."
-        read -n 1 -s
+        return 0
+      elif [[ $result -eq 2 ]]; then
+        handled=true
+        # Special return: go back to main menu
+        launch
+        return 0
+      fi
     fi
+  done
+
+  # If nothing handled the selection, show debug info
+  if [[ "$handled" == "false" ]]; then
+    echo ""
+    echo "No module handled this selection:"
+    echo "  name: $name"
+    echo "  key: '$key' (expected: '$PRIMARY_KEY' or '$SECONDARY_KEY')"
+    echo "  cmd: $cmd"
+    echo ""
+    echo "Press any key..."
+    read -n 1 -s
+  fi
 }
 
 # Show help
 usage() {
-    cat <<EOF
+  cat <<EOF
 nunchux - Smart tmux app launcher
 
 Usage: nunchux [options]
@@ -481,24 +481,24 @@ EOF
 
 # List apps
 list_apps() {
-    echo "Configured items:"
-    echo ""
-    for name in "${APP_ORDER[@]}"; do
-        local cmd="${APP_CMD[$name]:-}"
-        local desc="${APP_DESC[$name]:-}"
-        if is_app_running "$name"; then
-            printf "  %s %-12s %s\n" "$ICON_RUNNING" "$name" "$desc"
-        else
-            printf "  %s %-12s %s\n" "$ICON_STOPPED" "$name" "$desc"
-        fi
-    done
+  echo "Configured items:"
+  echo ""
+  for name in "${APP_ORDER[@]}"; do
+    local cmd="${APP_CMD[$name]:-}"
+    local desc="${APP_DESC[$name]:-}"
+    if is_app_running "$name"; then
+      printf "  %s %-12s %s\n" "$ICON_RUNNING" "$name" "$desc"
+    else
+      printf "  %s %-12s %s\n" "$ICON_STOPPED" "$name" "$desc"
+    fi
+  done
 }
 
 # Output shell initialization code for environment capture
 shell_init() {
-    local shell_type="${1:-bash}"
+  local shell_type="${1:-bash}"
 
-    cat <<'EOF'
+  cat <<'EOF'
 # Nunchux shell integration - saves environment for inheritance
 # This runs after each command, so apps launched via nunchux
 # inherit your current shell environment (PATH, nvm, pyenv, etc.)
@@ -508,89 +508,94 @@ if [[ -n "$TMUX_PANE" ]]; then
     }
 EOF
 
-    case "$shell_type" in
-        zsh)
-            cat <<'EOF'
+  case "$shell_type" in
+  zsh)
+    cat <<'EOF'
     precmd_functions+=(_nunchux_save_env)
 fi
 EOF
-            ;;
-        fish)
-            # Fish has completely different syntax
-            cat <<'EOF'
+    ;;
+  fish)
+    # Fish has completely different syntax
+    cat <<'EOF'
 if set -q TMUX_PANE
     function _nunchux_save_env --on-event fish_postexec
         env > "/tmp/nunchux-env-$TMUX_PANE" 2>/dev/null
     end
 end
 EOF
-            return
-            ;;
-        *)  # bash and others
-            cat <<'EOF'
+    return
+    ;;
+  *) # bash and others
+    cat <<'EOF'
     PROMPT_COMMAND="_nunchux_save_env${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
 fi
 EOF
-            ;;
-    esac
+    ;;
+  esac
 }
 
 # Main
 main() {
+  case "${1:-}" in
+  --shell-init)
+    shift
+    shell_init "${1:-bash}"
+    exit 0
+    ;;
+  --kill)
+    shift
+    # Try app first, then taskrunner
+    kill_app "$1" 2>/dev/null || taskrunner_kill "$1" 2>/dev/null || true
+    ;;
+  --menu)
+    if [[ "${2:-}" == "--submenu" ]]; then
+      CURRENT_MENU="$3"
+    fi
+    build_menu
+    ;;
+  --list)
+    list_apps
+    ;;
+  --config)
+    shift
     case "${1:-}" in
-        --shell-init)
-            shift
-            shell_init "${1:-bash}"
-            exit 0
-            ;;
-        --kill)
-            shift
-            # Try app first, then taskrunner
-            kill_app "$1" 2>/dev/null || taskrunner_kill "$1" 2>/dev/null || true
-            ;;
-        --menu)
-            if [[ "${2:-}" == "--submenu" ]]; then
-                CURRENT_MENU="$3"
-            fi
-            build_menu
-            ;;
-        --list)
-            list_apps
-            ;;
-        --config)
-            shift
-            case "${1:-}" in
-                menu_width) echo "$MENU_WIDTH" ;;
-                menu_height) echo "$MENU_HEIGHT" ;;
-                popup_width) echo "$APP_POPUP_WIDTH" ;;
-                popup_height) echo "$APP_POPUP_HEIGHT" ;;
-                *) echo "Unknown config: $1" >&2; exit 1 ;;
-            esac
-            ;;
-        --submenu)
-            shift
-            CURRENT_MENU="$1"
-            FZF_BORDER_LABEL=" $CURRENT_MENU "
-            if ! launch 2>&1; then
-                echo "Press any key to close..."
-                read -n 1
-            fi
-            ;;
-        --help|-h|help)
-            usage
-            ;;
-        "")
-            if ! launch 2>&1; then
-                echo "Press any key to close..."
-                read -n 1
-            fi
-            ;;
-        *)
-            echo "Unknown option: $1" >&2
-            usage >&2
-            exit 1
-            ;;
+    menu_width) echo "$MENU_WIDTH" ;;
+    menu_height) echo "$MENU_HEIGHT" ;;
+    popup_width) echo "$APP_POPUP_WIDTH" ;;
+    popup_height) echo "$APP_POPUP_HEIGHT" ;;
+    *)
+      echo "Unknown config: $1" >&2
+      exit 1
+      ;;
     esac
+    ;;
+  --submenu)
+    shift
+    CURRENT_MENU="$1"
+    FZF_BORDER_LABEL=" $CURRENT_MENU "
+    if ! launch 2>&1; then
+      echo "Press any key to close..."
+      read -n 1
+    fi
+    ;;
+  --help | -h | help)
+    usage
+    ;;
+  "")
+    if ! launch 2>&1; then
+      echo "Press any key to close..."
+      read -n 1
+    fi
+    ;;
+  *)
+    echo "Unknown option: $1" >&2
+    usage >&2
+    exit 1
+    ;;
+  esac
 }
 
 main "$@"
+
+# vim: ft=bash ts=2 sw=2 et

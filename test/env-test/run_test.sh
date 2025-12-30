@@ -20,11 +20,11 @@ NUNCHUX_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Check we're in tmux
 if [[ -z "${TMUX:-}" ]]; then
-    echo "Error: This test must be run inside tmux."
-    echo ""
-    echo "Start tmux first, then run:"
-    echo "  $0"
-    exit 1
+  echo "Error: This test must be run inside tmux."
+  echo ""
+  echo "Start tmux first, then run:"
+  echo "  $0"
+  exit 1
 fi
 
 echo "=== Nunchux Environment Variable Test ==="
@@ -50,3 +50,5 @@ read -p "Press Enter to launch nunchux..."
 # Run nunchux with our test config
 cd "$SCRIPT_DIR"
 NUNCHUX_RC_FILE="$SCRIPT_DIR/.nunchuxrc" "$NUNCHUX_ROOT/bin/nunchux"
+
+# vim: ft=bash ts=2 sw=2 et

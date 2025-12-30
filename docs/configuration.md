@@ -259,3 +259,5 @@ icon_running =
 icon_success =
 icon_failed =
 ```
+
+<!-- vim: ft=markdown ts=2 sw=2 et -->

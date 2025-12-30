@@ -59,4 +59,4 @@ icon = 📦
 enabled = true
 icon = 📋
 
-# vim: ft=dosini
+# vim: ft=dosini ts=2 sw=2 et

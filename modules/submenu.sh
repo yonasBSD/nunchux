@@ -28,110 +28,110 @@ register_module "menu"
 # Parse a config section for a menu
 # Called by config parser when [menu:name] is encountered
 menu_parse_section() {
-    local name="$1"
-    local data_decl="$2"
+  local name="$1"
+  local data_decl="$2"
 
-    # Temporarily disable set -u for associative array access
-    set +u
+  # Temporarily disable set -u for associative array access
+  set +u
 
-    # Reconstruct associative array from declaration
-    eval "$data_decl"
+  # Reconstruct associative array from declaration
+  eval "$data_decl"
 
-    # Store menu configuration
-    MENU_DESC["$name"]="${section_data[desc]:-}"
-    SUBMENU_CACHE_TTL["$name"]="${section_data[cache_ttl]:-}"
+  # Store menu configuration
+  MENU_DESC["$name"]="${section_data[desc]:-}"
+  SUBMENU_CACHE_TTL["$name"]="${section_data[cache_ttl]:-}"
 
-    # Handle status or status_script
-    if [[ -n "${section_data[status_script]:-}" ]]; then
-        local script="${section_data[status_script]}"
-        MENU_STATUS["$name"]="source ${script/#\~/$HOME}"
-    elif [[ -n "${section_data[status]:-}" ]]; then
-        MENU_STATUS["$name"]="${section_data[status]}"
-    fi
+  # Handle status or status_script
+  if [[ -n "${section_data[status_script]:-}" ]]; then
+    local script="${section_data[status_script]}"
+    MENU_STATUS["$name"]="source ${script/#\~/$HOME}"
+  elif [[ -n "${section_data[status]:-}" ]]; then
+    MENU_STATUS["$name"]="${section_data[status]}"
+  fi
 
-    # Parse order property
-    local _order="${section_data[order]:-}"
+  # Parse order property
+  local _order="${section_data[order]:-}"
 
-    set -u
+  set -u
 
-    MENU_ORDER+=("$name")
+  MENU_ORDER+=("$name")
 
-    # Track in global order with optional explicit order
-    track_config_item "menu:$name" "$_order"
+  # Track in global order with optional explicit order
+  track_config_item "menu:$name" "$_order"
 }
 
 # Build menu entries for submenus
 # Only shown in main menu (when current_menu is empty)
 menu_build_menu() {
-    local current_menu="${1:-}"
+  local current_menu="${1:-}"
 
-    # Submenus only appear in main menu
-    [[ -n "$current_menu" ]] && return
+  # Submenus only appear in main menu
+  [[ -n "$current_menu" ]] && return
 
-    for name in "${MENU_ORDER[@]}"; do
-        local desc="" status_output=""
+  for name in "${MENU_ORDER[@]}"; do
+    local desc="" status_output=""
 
-        desc="${MENU_DESC[$name]:-}"
+    desc="${MENU_DESC[$name]:-}"
 
-        # Run status command if defined
-        if [[ -n "${MENU_STATUS[$name]:-}" ]]; then
-            status_output=$(eval "${MENU_STATUS[$name]}" 2>/dev/null || true)
-            if [[ -n "$status_output" ]]; then
-                if [[ -n "$desc" ]]; then
-                    desc="$desc $status_output"
-                else
-                    desc="$status_output"
-                fi
-            fi
+    # Run status command if defined
+    if [[ -n "${MENU_STATUS[$name]:-}" ]]; then
+      status_output=$(eval "${MENU_STATUS[$name]}" 2>/dev/null || true)
+      if [[ -n "$status_output" ]]; then
+        if [[ -n "$desc" ]]; then
+          desc="$desc $status_output"
+        else
+          desc="$status_output"
         fi
+      fi
+    fi
 
-        # Format: visible_part \t name \t (empty fields for cmd, width, height, on_exit)
-        # Use menu: prefix to identify submenus
-        printf "▸  %-12s  %s\t%s\t\t\t\t\n" "$name" "$desc" "menu:$name"
-    done
+    # Format: visible_part \t name \t (empty fields for cmd, width, height, on_exit)
+    # Use menu: prefix to identify submenus
+    printf "▸  %-12s  %s\t%s\t\t\t\t\n" "$name" "$desc" "menu:$name"
+  done
 }
 
 # Launch (enter) a submenu
 # Returns 0 if handled, 1 if not our item
 menu_launch() {
-    local name="$1"
-    local key="$2"
+  local name="$1"
+  local key="$2"
 
-    # Check if this is a menu reference
-    [[ "$name" != menu:* ]] && return 1
+  # Check if this is a menu reference
+  [[ "$name" != menu:* ]] && return 1
 
-    local menu_name="${name#menu:}"
+  local menu_name="${name#menu:}"
 
-    # Easter egg: ctrl-o on submenu
-    if [[ "$key" == "ctrl-o" ]]; then
-        show_chuck_easter_egg
-        return 0
-    fi
-
-    # Enter the submenu
-    CURRENT_MENU="$menu_name"
-    FZF_BORDER_LABEL=" $menu_name "
-
+  # Easter egg: ctrl-o on submenu
+  if [[ "$key" == "ctrl-o" ]]; then
+    show_chuck_easter_egg
     return 0
+  fi
+
+  # Enter the submenu
+  CURRENT_MENU="$menu_name"
+  FZF_BORDER_LABEL=" $menu_name "
+
+  return 0
 }
 
 # Get cache TTL for a menu
 menu_get_cache_ttl() {
-    local name="$1"
-    echo "${SUBMENU_CACHE_TTL[$name]:-$MENU_CACHE_TTL}"
+  local name="$1"
+  echo "${SUBMENU_CACHE_TTL[$name]:-$MENU_CACHE_TTL}"
 }
 
 # Check if we have any menus configured
 menu_has_items() {
-    [[ ${#MENU_ORDER[@]} -gt 0 ]]
+  [[ ${#MENU_ORDER[@]} -gt 0 ]]
 }
 
 # Easter egg: Chuck Norris fact when trying to open submenu in window
 show_chuck_easter_egg() {
-    local fact="${CHUCK_FACTS[$RANDOM % ${#CHUCK_FACTS[@]}]}"
-    local script_file="/tmp/nunchux-popup-$$"
+  local fact="${CHUCK_FACTS[$RANDOM % ${#CHUCK_FACTS[@]}]}"
+  local script_file="/tmp/nunchux-popup-$$"
 
-    cat > "$script_file" << NUNCHUX_EOF
+  cat >"$script_file" <<NUNCHUX_EOF
 #!/usr/bin/env bash
 
 center() {
@@ -166,7 +166,9 @@ read -n 1 -s
 rm -f "\$0"
 NUNCHUX_EOF
 
-    chmod +x "$script_file"
-    tmux run-shell -b "sleep 0.05; tmux display-popup -E -b rounded -w $MENU_WIDTH -h $MENU_HEIGHT '$script_file'"
-    exit 0
+  chmod +x "$script_file"
+  tmux run-shell -b "sleep 0.05; tmux display-popup -E -b rounded -w $MENU_WIDTH -h $MENU_HEIGHT '$script_file'"
+  exit 0
 }
+
+# vim: ft=bash ts=2 sw=2 et

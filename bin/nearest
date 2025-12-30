@@ -3,7 +3,9 @@
 file="$1"
 dir=$(tmux display-message -p '#{pane_current_path}' 2>/dev/null || pwd)
 while [[ "$dir" != "/" ]]; do
-    [[ -f "$dir/$file" ]] && echo "$dir/$file" && exit 0
-    dir=$(dirname "$dir")
+  [[ -f "$dir/$file" ]] && echo "$dir/$file" && exit 0
+  dir=$(dirname "$dir")
 done
 exit 1
+
+# vim: ft=bash ts=2 sw=2 et

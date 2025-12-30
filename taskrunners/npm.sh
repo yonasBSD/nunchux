@@ -27,3 +27,5 @@ plugin_items() {
     dir=$(dirname "$dir")
   done
 }
+
+# vim: ft=bash ts=2 sw=2 et

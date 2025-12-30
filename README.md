@@ -67,6 +67,7 @@ set -g @nunchux-key 'C-Space'
 ## Configuring your apps
 
 Nunchux searches for config in this order:
+
 1. `.nunchuxrc` in current directory (or any parent, like `.gitignore`)
 2. `NUNCHUX_RC_FILE` environment variable
 3. `~/.config/nunchux/config`
@@ -178,16 +179,19 @@ reads that saved environment.
 Add this to your shell rc file:
 
 **Bash** (`~/.bashrc`):
+
 ```bash
 source ~/.tmux/plugins/nunchux/shell-init.bash
 ```
 
 **Zsh** (`~/.zshrc`):
+
 ```zsh
 source ~/.tmux/plugins/nunchux/shell-init.zsh
 ```
 
 **Fish** (`~/.config/fish/config.fish`):
+
 ```fish
 source ~/.tmux/plugins/nunchux/shell-init.fish
 ```
@@ -206,3 +210,5 @@ This saves your environment after each command, so apps launched from nunchux
 * jq (for npm/task runner)
 * just (for justfile runner)
 * task or go-task (for Taskfile runner)
+
+<!-- vim: ft=markdown ts=2 sw=2 et -->

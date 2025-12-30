@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 # Show line count with pluralization
-n=$(wc -l < "$1" 2>/dev/null | tr -d ' ' || echo 0)
+n=$(wc -l <"$1" 2>/dev/null | tr -d ' ' || echo 0)
 [[ $n -eq 1 ]] && echo "1 line" || echo "$n lines"
+
+# vim: ft=bash ts=2 sw=2 et

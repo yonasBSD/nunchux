@@ -47,3 +47,5 @@ main() {
 }
 
 main
+
+# vim: ft=tmux ts=2 sw=2 et

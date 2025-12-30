@@ -82,3 +82,5 @@ echo ""
 
 # shellcheck disable=SC2086
 bats $VERBOSE $TEST_FILES
+
+# vim: ft=bash ts=2 sw=2 et

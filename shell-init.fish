@@ -15,3 +15,5 @@ if set -q TMUX_PANE
         rm -f "/tmp/nunchux-env-$TMUX_PANE" 2>/dev/null
     end
 end
+
+# vim: ft=fish ts=2 sw=2 et

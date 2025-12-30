@@ -16,3 +16,5 @@ desc = Print environment variables
 [app:envdump]
 cmd = bash -c 'env | sort > /tmp/nunchux-env-test-output && echo "Environment written to /tmp/nunchux-env-test-output" && echo "Press any key..." && read -n1'
 desc = Dump env to file
+
+# vim: ft=dosini ts=2 sw=2 et

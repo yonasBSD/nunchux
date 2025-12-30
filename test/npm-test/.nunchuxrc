@@ -6,3 +6,5 @@ menu_height = 50%
 
 [taskrunner:npm]
 enabled = true
+
+# vim: ft=dosini ts=2 sw=2 et

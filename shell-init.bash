@@ -14,3 +14,5 @@ if [[ -n "$TMUX_PANE" ]]; then
     # Clean up env file when shell exits
     trap 'rm -f "/tmp/nunchux-env-$TMUX_PANE" 2>/dev/null' EXIT
 fi
+
+# vim: ft=bash ts=2 sw=2 et
