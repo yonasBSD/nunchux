@@ -29,6 +29,25 @@ Press the shortcut key while the menu is open to launch the item immediately.
 
 Shortcuts are available on apps, submenus, and directory browsers. Taskrunner items cannot have shortcuts (they're discovered at runtime).
 
+### Maximum Dimensions
+
+Cap popup and menu sizes on large screens with new `max_*` settings:
+
+```ini
+[settings]
+popup_width = 90%
+popup_height = 90%
+max_popup_height = 50
+max_popup_width = 160
+
+menu_width = 60%
+menu_height = 50%
+max_menu_width = 120
+max_menu_height = 40
+```
+
+Percentages are calculated against the tmux window size, then clamped to the maximum.
+
 ### Bug Fixes
 
 - Fixed helper commands (`ago`, `lines`, `nearest`) not working in status commands when environment inheritance was enabled

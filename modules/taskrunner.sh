@@ -335,8 +335,12 @@ rm -f "$script_file"
 NUNCHUX_EOF
   chmod +x "$script_file"
 
+  # Clamp dimensions to max if set
+  local width="$APP_POPUP_WIDTH" height="$APP_POPUP_HEIGHT"
+  clamp_popup_dimensions width height
+
   local title=" $NUNCHUX_LABEL: $task_name "
-  tmux run-shell -b "sleep 0.05; tmux display-popup -E -b rounded -T '$title' -w '$APP_POPUP_WIDTH' -h '$APP_POPUP_HEIGHT' '$script_file'"
+  tmux run-shell -b "sleep 0.05; tmux display-popup -E -b rounded -T '$title' -w '$width' -h '$height' '$script_file'"
   exit 0
 }
 

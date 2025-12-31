@@ -18,8 +18,12 @@ ICON_RUNNING="${ICON_RUNNING:-●}"
 ICON_STOPPED="${ICON_STOPPED:-○}"
 MENU_WIDTH="${MENU_WIDTH:-60%}"
 MENU_HEIGHT="${MENU_HEIGHT:-50%}"
+MAX_MENU_WIDTH="${MAX_MENU_WIDTH:-}"   # empty = no limit (columns)
+MAX_MENU_HEIGHT="${MAX_MENU_HEIGHT:-}" # empty = no limit (rows)
 APP_POPUP_WIDTH="${APP_POPUP_WIDTH:-90%}"
 APP_POPUP_HEIGHT="${APP_POPUP_HEIGHT:-90%}"
+MAX_POPUP_WIDTH="${MAX_POPUP_WIDTH:-}"   # empty = no limit (columns)
+MAX_POPUP_HEIGHT="${MAX_POPUP_HEIGHT:-}" # empty = no limit (rows)
 MENU_CACHE_TTL="${MENU_CACHE_TTL:-60}"
 
 # Keybindings
@@ -287,8 +291,12 @@ parse_config() {
         icon_stopped) ICON_STOPPED="$value" ;;
         menu_width) MENU_WIDTH="$value" ;;
         menu_height) MENU_HEIGHT="$value" ;;
+        max_menu_width) MAX_MENU_WIDTH="$value" ;;
+        max_menu_height) MAX_MENU_HEIGHT="$value" ;;
         popup_width) APP_POPUP_WIDTH="$value" ;;
         popup_height) APP_POPUP_HEIGHT="$value" ;;
+        max_popup_width) MAX_POPUP_WIDTH="$value" ;;
+        max_popup_height) MAX_POPUP_HEIGHT="$value" ;;
         fzf_prompt) FZF_PROMPT="$value" ;;
         fzf_pointer) FZF_POINTER="$value" ;;
         fzf_border) FZF_BORDER="$value" ;;

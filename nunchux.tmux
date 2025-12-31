@@ -22,10 +22,12 @@ get_tmux_option() {
 }
 
 main() {
-    local key width height
+    local key width height max_width max_height
     key=$(get_tmux_option "@nunchux-key" "g")
     width=$("$NUNCHUX_CMD" --config menu_width)
     height=$("$NUNCHUX_CMD" --config menu_height)
+    max_width=$("$NUNCHUX_CMD" --config max_menu_width)
+    max_height=$("$NUNCHUX_CMD" --config max_menu_height)
 
     # Bind key to open nunchux in a popup
     # Keys with "-" (like C-Space) bind without prefix, others require prefix
@@ -39,7 +41,9 @@ main() {
     #   source ~/.tmux/plugins/nunchux/shell-init.bash
     local env_file='/tmp/nunchux-env-#{pane_id}'
     local setup_cmd="tmux set-environment NUNCHUX_PARENT_PANE '#{pane_id}'; tmux set-environment NUNCHUX_ENV_FILE '$env_file'"
-    local popup_cmd="tmux display-popup -E -B -d '#{pane_current_path}' -w '$width' -h '$height' '$NUNCHUX_CMD'"
+
+    # Launch nunchux with --popup flag, which handles dimension clamping internally
+    local popup_cmd="$NUNCHUX_CMD --popup"
 
     local bind_opts=""
     [[ $key == *"-"* ]] && bind_opts="-n"

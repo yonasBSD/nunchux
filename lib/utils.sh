@@ -89,4 +89,24 @@ check_fzf_version() {
   return 1
 }
 
+# Clamp popup dimensions to max if configured
+# Usage: clamp_popup_dimensions width_var height_var
+# Modifies the variables in place
+clamp_popup_dimensions() {
+  local -n _width=$1 _height=$2
+
+  if [[ "$_width" == *% && -n "${MAX_POPUP_WIDTH:-}" ]]; then
+    local term_cols pct_width
+    term_cols=$(tmux display-message -p '#{window_width}' 2>/dev/null || tput cols)
+    pct_width=$((term_cols * ${_width%\%} / 100))
+    ((pct_width > MAX_POPUP_WIDTH)) && _width="$MAX_POPUP_WIDTH"
+  fi
+  if [[ "$_height" == *% && -n "${MAX_POPUP_HEIGHT:-}" ]]; then
+    local term_lines pct_height
+    term_lines=$(tmux display-message -p '#{window_height}' 2>/dev/null || tput lines)
+    pct_height=$((term_lines * ${_height%\%} / 100))
+    ((pct_height > MAX_POPUP_HEIGHT)) && _height="$MAX_POPUP_HEIGHT"
+  fi
+}
+
 # vim: ft=bash ts=2 sw=2 et

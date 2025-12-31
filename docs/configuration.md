@@ -47,8 +47,12 @@ The `[settings]` section controls global behavior:
 | `icon_stopped` | `○` | Icon shown next to stopped apps |
 | `menu_width` | `60%` | Width of the app selector menu |
 | `menu_height` | `50%` | Height of the app selector menu |
+| `max_menu_width` | (none) | Maximum menu width in columns |
+| `max_menu_height` | (none) | Maximum menu height in rows |
 | `popup_width` | `90%` | Default width for app popups |
 | `popup_height` | `90%` | Default height for app popups |
+| `max_popup_width` | (none) | Maximum popup width in columns |
+| `max_popup_height` | (none) | Maximum popup height in rows |
 | `primary_key` | `enter` | Key for primary action |
 | `secondary_key` | `ctrl-o` | Key for secondary action |
 | `primary_action` | `popup` | Default primary action (see below) |
@@ -60,6 +64,25 @@ The `[settings]` section controls global behavior:
 | `fzf_colors` | (see below) | fzf color scheme |
 | `cache_ttl` | `60` | Seconds before cache refresh (0 to disable) |
 | `exclude_patterns` | (see below) | Patterns to exclude from directory browsers |
+
+### Maximum Dimensions
+
+On large screens, percentage-based dimensions can result in overly large popups. Use `max_menu_*` and `max_popup_*` settings to cap dimensions:
+
+```ini
+[settings]
+menu_width = 60%
+menu_height = 50%
+max_menu_width = 120    # Cap menu at 120 columns
+max_menu_height = 40    # Cap menu at 40 rows
+
+popup_width = 90%
+popup_height = 90%
+max_popup_width = 160   # Cap app popups at 160 columns
+max_popup_height = 50   # Cap app popups at 50 rows
+```
+
+The percentage is calculated against the current tmux window size, then clamped to the maximum if exceeded.
 
 ### Action Types
 

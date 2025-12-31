@@ -685,6 +685,8 @@ main() {
     case "${1:-}" in
     menu_width) echo "$MENU_WIDTH" ;;
     menu_height) echo "$MENU_HEIGHT" ;;
+    max_menu_width) echo "$MAX_MENU_WIDTH" ;;
+    max_menu_height) echo "$MAX_MENU_HEIGHT" ;;
     popup_width) echo "$APP_POPUP_WIDTH" ;;
     popup_height) echo "$APP_POPUP_HEIGHT" ;;
     *)
@@ -692,6 +694,31 @@ main() {
       exit 1
       ;;
     esac
+    ;;
+  --popup)
+    # Launch self in a tmux popup with clamped dimensions
+    local width="$MENU_WIDTH" height="$MENU_HEIGHT"
+
+    # Clamp to max if configured
+    if [[ "$width" == *% && -n "${MAX_MENU_WIDTH:-}" ]]; then
+      local term_cols pct_width
+      term_cols=$(tmux display-message -p '#{window_width}')
+      pct_width=$((term_cols * ${width%\%} / 100))
+      ((pct_width > MAX_MENU_WIDTH)) && width="$MAX_MENU_WIDTH"
+    fi
+    if [[ "$height" == *% && -n "${MAX_MENU_HEIGHT:-}" ]]; then
+      local term_lines pct_height
+      term_lines=$(tmux display-message -p '#{window_height}')
+      pct_height=$((term_lines * ${height%\%} / 100))
+      ((pct_height > MAX_MENU_HEIGHT)) && height="$MAX_MENU_HEIGHT"
+    fi
+
+    local script_path
+    script_path=$(realpath "${BASH_SOURCE[0]}")
+    local dir
+    dir=$(tmux display-message -p '#{pane_current_path}')
+
+    exec tmux display-popup -E -B -d "$dir" -w "$width" -h "$height" "$script_path"
     ;;
   --submenu)
     shift

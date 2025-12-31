@@ -146,6 +146,9 @@ _nunchux_launch_popup() {
   local name="$1" cmd="$2" dir="$3" width="$4" height="$5" type="$6" on_exit="$7"
   local script="/tmp/nunchux-popup-$$"
 
+  # Clamp dimensions to max if set
+  clamp_popup_dimensions width height
+
   if [[ "$type" == "app" ]]; then
     # App popup: variable substitution, on_exit, Chuck facts on error
     local pane_id tmp
