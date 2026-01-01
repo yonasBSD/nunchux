@@ -25,6 +25,7 @@ APP_POPUP_HEIGHT="${APP_POPUP_HEIGHT:-90%}"
 MAX_POPUP_WIDTH="${MAX_POPUP_WIDTH:-}"   # empty = no limit (columns)
 MAX_POPUP_HEIGHT="${MAX_POPUP_HEIGHT:-}" # empty = no limit (rows)
 MENU_CACHE_TTL="${MENU_CACHE_TTL:-60}"
+SHOW_HELP="${SHOW_HELP:-false}"          # show help header and shortcuts (toggle with ctrl-/)
 
 # Keybindings
 PRIMARY_KEY="${PRIMARY_KEY:-enter}"
@@ -308,6 +309,7 @@ parse_config() {
         secondary_key) SECONDARY_KEY="$value" ;;
         primary_action) PRIMARY_ACTION="$value" ;;
         secondary_action) SECONDARY_ACTION="$value" ;;
+        show_help) SHOW_HELP="$value" ;;
         esac
       elif [[ "$current_section" == "taskrunner" ]]; then
         # Handle taskrunner defaults

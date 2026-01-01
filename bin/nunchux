@@ -85,6 +85,11 @@ if [[ -n "$config_file" ]]; then
   parse_config "$config_file"
 fi
 
+# Initialize help display state from config (can be toggled with ctrl-/)
+if [[ "${SHOW_HELP:-true}" == "true" ]]; then
+  SHOW_SHORTCUTS=1
+fi
+
 # Show invalid keybinding error
 show_invalid_key_error() {
   local invalid_key="$1"
@@ -418,11 +423,16 @@ launch() {
   local reload_cmd="$script_path --menu"
   local primary_display="${PRIMARY_KEY^}"
   local secondary_display="${SECONDARY_KEY^}"
-  local header="$primary_display: primary_action | $secondary_display: secondary_action | Ctrl-X: kill"
+
+  # Build header (only shown when SHOW_SHORTCUTS is set)
+  local header=""
+  if [[ -n "$SHOW_SHORTCUTS" ]]; then
+    header="$primary_display: primary_action | $secondary_display: secondary_action | Ctrl-X: kill"
+    [[ -n "$CURRENT_MENU" ]] && header="$header | Esc: back"
+  fi
 
   if [[ -n "$CURRENT_MENU" ]]; then
     reload_cmd="$script_path --menu --submenu $CURRENT_MENU"
-    header="$primary_display: primary_action | $secondary_display: secondary_action | Ctrl-X: kill | Esc: back"
   fi
 
   # Cache settings
@@ -453,15 +463,20 @@ launch() {
   [[ -n "$CURRENT_MENU" ]] && toggle_cmd="$toggle_cmd --submenu $CURRENT_MENU"
 
   if [[ -n "$SHOW_SHORTCUTS" ]]; then
-    fzf_opts+=(--bind="ctrl-/:become($toggle_cmd)")
+    fzf_opts+=(--bind="ctrl-/:become($toggle_cmd --hide-shortcuts)")
   else
     fzf_opts+=(--bind="ctrl-/:become($toggle_cmd --show-shortcuts)")
   fi
 
-  # Run with cache if valid
+  # Run with cache if valid (but skip cache when showing shortcuts to avoid hot-swap issues)
   local fzf_exit=0
   local fzf_stderr="/tmp/nunchux-fzf-stderr-$$"
-  if is_cache_valid "$cache_file" "$cache_ttl"; then
+  if [[ -n "$SHOW_SHORTCUTS" ]]; then
+    # When showing shortcuts, build fresh each time (no caching)
+    selection=$(build_menu | add_shortcut_prefixes | fzf "${fzf_opts[@]}" 2>"$fzf_stderr") || fzf_exit=$?
+  elif is_cache_valid "$cache_file" "$cache_ttl"; then
+    # Clean up any leftover socket from previous invocation (e.g., if fzf was replaced via become())
+    rm -f "$socket" 2>/dev/null || true
     refresh_cache "$cache_file" "$socket" build_menu &
     local refresh_pid=$!
     selection=$(cat "$cache_file" | fzf "${fzf_opts[@]}" --listen "$socket" 2>"$fzf_stderr") || fzf_exit=$?
@@ -518,12 +533,13 @@ launch() {
   fi
 
   # Extract fields (tab-separated)
+  # Format: display \t shortcut \t name \t cmd \t width \t height \t on_exit
   local name cmd width height on_exit
-  name=$(echo "$selected_line" | cut -f2)
-  cmd=$(echo "$selected_line" | cut -f3)
-  width=$(echo "$selected_line" | cut -f4)
-  height=$(echo "$selected_line" | cut -f5)
-  on_exit=$(echo "$selected_line" | cut -f6)
+  name=$(echo "$selected_line" | cut -f3)
+  cmd=$(echo "$selected_line" | cut -f4)
+  width=$(echo "$selected_line" | cut -f5)
+  height=$(echo "$selected_line" | cut -f6)
+  on_exit=$(echo "$selected_line" | cut -f7)
 
   if [[ -z "$name" ]]; then
     return 0
@@ -732,6 +748,18 @@ main() {
   --show-shortcuts)
     SHOW_SHORTCUTS=1
     export SHOW_SHORTCUTS
+    shift
+    if [[ "${1:-}" == "--submenu" ]]; then
+      CURRENT_MENU="$2"
+      FZF_BORDER_LABEL=" $NUNCHUX_LABEL: $CURRENT_MENU "
+    fi
+    if ! launch 2>&1; then
+      echo "Press any key to close..."
+      read -n 1
+    fi
+    ;;
+  --hide-shortcuts)
+    SHOW_SHORTCUTS=""
     shift
     if [[ "${1:-}" == "--submenu" ]]; then
       CURRENT_MENU="$2"

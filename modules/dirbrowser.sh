@@ -89,12 +89,11 @@ dirbrowser_build_menu() {
     file_count=$(find "$dir" -type f 2>/dev/null | wc -l | tr -d ' ')
     [[ "$file_count" -gt 1000 ]] && file_count="1000+"
 
-    local shortcut_prefix
-    shortcut_prefix=$(build_shortcut_prefix "${DIRBROWSE_SHORTCUT[$name]:-}")
+    local shortcut="${DIRBROWSE_SHORTCUT[$name]:-}"
 
-    # Format: visible_part \t name \t (empty fields)
+    # Format: visible_part \t shortcut \t name \t (empty fields)
     # Use dirbrowser: prefix to identify
-    printf "%s▸ %-12s  (%s files)\t%s\t\t\t\t\n" "$shortcut_prefix" "$name" "$file_count" "dirbrowser:$name"
+    printf "▸ %-12s  (%s files)\t%s\t%s\t\t\t\t\n" "$name" "$file_count" "$shortcut" "dirbrowser:$name"
   done
 }
 
@@ -257,7 +256,9 @@ launch_dirbrowse() {
   local fzf_opts
   local primary_display="${PRIMARY_KEY^}"
   local secondary_display="${SECONDARY_KEY^}"
-  build_fzf_opts fzf_opts "$primary_display: edit | $secondary_display: window | Esc: back"
+  local header=""
+  [[ -n "$SHOW_SHORTCUTS" ]] && header="$primary_display: edit | $secondary_display: window | Esc: back"
+  build_fzf_opts fzf_opts "$header"
   fzf_opts+=(--ansi)
 
   # Check if we have a valid cache

@@ -87,12 +87,11 @@ menu_build_menu() {
       fi
     fi
 
-    local shortcut_prefix
-    shortcut_prefix=$(build_shortcut_prefix "${MENU_SHORTCUT[$name]:-}")
+    local shortcut="${MENU_SHORTCUT[$name]:-}"
 
-    # Format: visible_part \t name \t (empty fields for cmd, width, height, on_exit)
+    # Format: visible_part \t shortcut \t name \t (empty fields for cmd, width, height, on_exit)
     # Use menu: prefix to identify submenus
-    printf "%s▸ %-12s  %s\t%s\t\t\t\t\n" "$shortcut_prefix" "$name" "$desc" "menu:$name"
+    printf "▸ %-12s  %s\t%s\t%s\t\t\t\t\n" "$name" "$desc" "$shortcut" "menu:$name"
   done
 }
 

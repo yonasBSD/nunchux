@@ -68,18 +68,31 @@ build_shortcut_binds() {
   done
 }
 
-# Build shortcut prefix for menu display
+# Build shortcut prefix for menu display (legacy - returns empty, shortcuts added at display time)
 # Usage: prefix=$(build_shortcut_prefix "$shortcut")
 build_shortcut_prefix() {
-  local shortcut="$1"
+  # Always return empty - shortcuts are now added dynamically via add_shortcut_prefixes
+  return
+}
 
-  [[ -z "$SHOW_SHORTCUTS" ]] && return
+# Add shortcut prefixes to menu lines
+# Reads from stdin, writes to stdout
+# Menu line format: display\tshortcut\trest...
+# If shortcut field is non-empty, prepends [shortcut] │ to display
+add_shortcut_prefixes() {
+  while IFS= read -r line; do
+    # Use cut to properly handle empty fields (bash read collapses consecutive delimiters)
+    local display shortcut rest
+    display=$(printf '%s' "$line" | cut -f1)
+    shortcut=$(printf '%s' "$line" | cut -f2)
+    rest=$(printf '%s' "$line" | cut -f3-)
 
-  if [[ -n "$shortcut" ]]; then
-    printf '\033[38;5;244m%-9s\033[0m│ ' "[$shortcut]"
-  else
-    printf '%9s│ ' ""
-  fi
+    if [[ -n "$shortcut" ]]; then
+      printf '\033[38;5;244m%-9s\033[0m│ %s\t%s\t%s\n' "[$shortcut]" "$display" "$shortcut" "$rest"
+    else
+      printf '%9s│ %s\t%s\t%s\n' "" "$display" "$shortcut" "$rest"
+    fi
+  done
 }
 
 # vim: ft=bash ts=2 sw=2 et

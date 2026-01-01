@@ -149,12 +149,11 @@ app_build_menu() {
     local width="${APP_WIDTH[$name]:-}"
     local height="${APP_HEIGHT[$name]:-}"
     local on_exit="${APP_ON_EXIT[$name]:-}"
-    local shortcut_prefix
-    shortcut_prefix=$(build_shortcut_prefix "${APP_SHORTCUT[$name]:-}")
+    local shortcut="${APP_SHORTCUT[$name]:-}"
 
-    # Format: visible_part \t name \t cmd \t width \t height \t on_exit
-    printf "%s%s %-12s  %s\t%s\t%s\t%s\t%s\t%s\n" \
-      "$shortcut_prefix" "$icon" "$display_name" "$desc" "$name" "$cmd" "$width" "$height" "$on_exit"
+    # Format: visible_part \t shortcut \t name \t cmd \t width \t height \t on_exit
+    printf "%s %-12s  %s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+      "$icon" "$display_name" "$desc" "$shortcut" "$name" "$cmd" "$width" "$height" "$on_exit"
   done
 }
 
