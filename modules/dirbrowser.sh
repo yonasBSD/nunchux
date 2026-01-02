@@ -251,7 +251,16 @@ launch_dirbrowse() {
   local primary_display="${PRIMARY_KEY^}"
   local secondary_display="${SECONDARY_KEY^}"
   local header=""
-  [[ -n "$SHOW_SHORTCUTS" ]] && header="$primary_display: edit | $secondary_display: window | Esc: back"
+  if [[ -n "$SHOW_SHORTCUTS" ]]; then
+    header="$primary_display: $PRIMARY_ACTION | $secondary_display: $SECONDARY_ACTION | Esc: back"
+    # Add action shortcuts (same line)
+    [[ -n "$POPUP_KEY" ]] && header="$header | ${POPUP_KEY^}: popup"
+    [[ -n "$WINDOW_KEY" ]] && header="$header | ${WINDOW_KEY^}: window"
+    [[ -n "$BACKGROUND_WINDOW_KEY" ]] && header="$header | ${BACKGROUND_WINDOW_KEY^}: bg"
+    [[ -n "$PANE_HORIZONTAL_KEY" ]] && header="$header | ${PANE_HORIZONTAL_KEY^}: hsplit"
+    [[ -n "$PANE_VERTICAL_KEY" ]] && header="$header | ${PANE_VERTICAL_KEY^}: vsplit"
+    [[ -n "$ACTION_MENU_KEY" ]] && header="$header | ${ACTION_MENU_KEY^}: actions"
+  fi
   build_fzf_opts fzf_opts "$header"
   fzf_opts+=(--ansi)
 
@@ -299,12 +308,14 @@ launch_dirbrowse() {
     local display_text
     display_text=$(echo "$selected_line" | cut -f1 | sed 's/.*│ //')
 
-    # Determine action based on key pressed
+    # Resolve action from key press
     local action
-    if [[ "$key" == "$SECONDARY_KEY" ]]; then
-      action="${DIRBROWSE_SECONDARY_ACTION[$name]:-$SECONDARY_ACTION}"
-    else
-      action="${DIRBROWSE_PRIMARY_ACTION[$name]:-$PRIMARY_ACTION}"
+    action=$(resolve_action "$key" "$file_basename" \
+      "${DIRBROWSE_PRIMARY_ACTION[$name]:-$PRIMARY_ACTION}" \
+      "${DIRBROWSE_SECONDARY_ACTION[$name]:-$SECONDARY_ACTION}")
+    if [[ "$action" == "$ACTION_CANCELLED" ]]; then
+      launch_dirbrowse "$name"
+      return $?
     fi
 
     # Build command with proper quoting

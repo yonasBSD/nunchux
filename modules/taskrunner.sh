@@ -215,14 +215,12 @@ taskrunner_launch() {
   local dir
   dir=$(get_current_dir)
 
-  # Determine action based on key pressed
-  # Taskrunner has its own defaults, but can be overridden per-taskrunner
+  # Resolve action from key press
   local action
-  if [[ "$key" == "$SECONDARY_KEY" ]]; then
-    action="${TASKRUNNER_SECONDARY_ACTION[$runner]:-$TASKRUNNER_DEFAULT_SECONDARY_ACTION}"
-  else
-    action="${TASKRUNNER_PRIMARY_ACTION[$runner]:-$TASKRUNNER_DEFAULT_PRIMARY_ACTION}"
-  fi
+  action=$(resolve_action "$key" "$task_name" \
+    "${TASKRUNNER_PRIMARY_ACTION[$runner]:-$TASKRUNNER_DEFAULT_PRIMARY_ACTION}" \
+    "${TASKRUNNER_SECONDARY_ACTION[$runner]:-$TASKRUNNER_DEFAULT_SECONDARY_ACTION}")
+  [[ "$action" == "$ACTION_CANCELLED" ]] && return 2
 
   # Execute the action
   case "$action" in
@@ -234,6 +232,12 @@ taskrunner_launch() {
       ;;
     background_window)
       _taskrunner_open_window "$task_name" "$cmd" "$dir" false
+      ;;
+    pane_horizontal)
+      _taskrunner_open_pane "$task_name" "$cmd" "$dir" "-h"
+      ;;
+    pane_vertical)
+      _taskrunner_open_pane "$task_name" "$cmd" "$dir" "-v"
       ;;
     *)
       # Unknown action, default to window
@@ -334,6 +338,30 @@ NUNCHUX_EOF
   local title=" $NUNCHUX_LABEL: $task_name "
   tmux run-shell -b "sleep 0.05; tmux display-popup -E -b rounded -T '$title' -w '$width' -h '$height' '$script_file'"
   exit 0
+}
+
+# Open taskrunner in a split pane
+# Args: task_name cmd dir split_flag (-h or -v)
+_taskrunner_open_pane() {
+  local task_name="$1"
+  local cmd="$2"
+  local dir="$3"
+  local split_flag="$4"
+
+  # Build the command with environment setup
+  local full_cmd="source '$NUNCHUX_BIN_DIR/nunchux-run'; $cmd"'
+exit_code=$?
+echo
+if [[ $exit_code -eq 0 ]]; then
+    echo -e "\033[32m✓ Task completed successfully\033[0m"
+else
+    echo -e "\033[31m✗ Task failed with exit code $exit_code\033[0m"
+fi
+echo
+echo "Press any key to close..."
+read -n 1 -s'
+
+  tmux split-window "$split_flag" -c "$dir" bash -c "$full_cmd"
 }
 
 # Kill a taskrunner window by name (format: runner:task)

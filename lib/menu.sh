@@ -20,11 +20,45 @@ FZF_COLORS="${FZF_COLORS:-fg+:white:bold,bg+:-1,hl:cyan,hl+:cyan:bold,pointer:cy
 NUNCHUX_LABEL="${NUNCHUX_LABEL:-nunchux}"
 FZF_BORDER_LABEL=" $NUNCHUX_LABEL "
 
+# Build border label with optional cwd
+# Usage: build_border_label [submenu_name]
+# Sets FZF_BORDER_LABEL global variable
+build_border_label() {
+  local submenu="${1:-}"
+  local label=" $NUNCHUX_LABEL"
+
+  # Add submenu if provided
+  if [[ -n "$submenu" ]]; then
+    label="$label: $submenu"
+  fi
+
+  # Add cwd if configured
+  if [[ "${SHOW_CWD:-true}" == "true" ]]; then
+    local cwd
+    cwd=$(tmux display-message -p '#{pane_current_path}' 2>/dev/null || pwd)
+    # Shorten home directory to ~
+    cwd="${cwd/#$HOME/\~}"
+    label="$label ($cwd)"
+  fi
+
+  FZF_BORDER_LABEL="$label "
+}
+
 # Build common fzf options array
 # Usage: build_fzf_opts opts_array "header text"
 build_fzf_opts() {
   local -n opts=$1
   local header="$2"
+
+  # Build expect list: secondary key + all action keys + action menu key
+  local expect_keys="$SECONDARY_KEY"
+  [[ -n "$POPUP_KEY" ]] && expect_keys="$expect_keys,$POPUP_KEY"
+  [[ -n "$WINDOW_KEY" ]] && expect_keys="$expect_keys,$WINDOW_KEY"
+  [[ -n "$BACKGROUND_WINDOW_KEY" ]] && expect_keys="$expect_keys,$BACKGROUND_WINDOW_KEY"
+  [[ -n "$PANE_HORIZONTAL_KEY" ]] && expect_keys="$expect_keys,$PANE_HORIZONTAL_KEY"
+  [[ -n "$PANE_VERTICAL_KEY" ]] && expect_keys="$expect_keys,$PANE_VERTICAL_KEY"
+  [[ -n "$ACTION_MENU_KEY" ]] && expect_keys="$expect_keys,$ACTION_MENU_KEY"
+
   opts=(
     --ansi
     --delimiter='\t'
@@ -40,9 +74,29 @@ build_fzf_opts() {
     --border-label="$FZF_BORDER_LABEL"
     --border-label-pos=3
     --no-preview
-    --expect="$SECONDARY_KEY"
+    --expect="$expect_keys"
     --color="$FZF_COLORS"
   )
+}
+
+# Map a pressed key to an action
+# Usage: action=$(key_to_action "$key")
+# Returns:
+#   - action name (popup, window, etc.) for direct action keys
+#   - "action_menu" for ACTION_MENU_KEY (caller should show menu)
+#   - empty string if key doesn't map to any action
+key_to_action() {
+  local key="$1"
+  # Empty key (e.g., Enter pressed) doesn't map to any action
+  [[ -z "$key" ]] && return
+  case "$key" in
+    "$POPUP_KEY") [[ -n "$POPUP_KEY" ]] && echo "popup" ;;
+    "$WINDOW_KEY") [[ -n "$WINDOW_KEY" ]] && echo "window" ;;
+    "$BACKGROUND_WINDOW_KEY") [[ -n "$BACKGROUND_WINDOW_KEY" ]] && echo "background_window" ;;
+    "$PANE_HORIZONTAL_KEY") [[ -n "$PANE_HORIZONTAL_KEY" ]] && echo "pane_horizontal" ;;
+    "$PANE_VERTICAL_KEY") [[ -n "$PANE_VERTICAL_KEY" ]] && echo "pane_vertical" ;;
+    "$ACTION_MENU_KEY") [[ -n "$ACTION_MENU_KEY" ]] && echo "action_menu" ;;
+  esac
 }
 
 # Parse fzf selection output (handles --expect keys)

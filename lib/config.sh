@@ -26,15 +26,28 @@ MAX_POPUP_WIDTH="${MAX_POPUP_WIDTH:-}"   # empty = no limit (columns)
 MAX_POPUP_HEIGHT="${MAX_POPUP_HEIGHT:-}" # empty = no limit (rows)
 MENU_CACHE_TTL="${MENU_CACHE_TTL:-60}"
 SHOW_HELP="${SHOW_HELP:-false}"          # show help header and shortcuts (toggle with ctrl-/)
+SHOW_CWD="${SHOW_CWD:-true}"             # show current working directory in menu label
 
 # Keybindings
 PRIMARY_KEY="${PRIMARY_KEY:-enter}"
 SECONDARY_KEY="${SECONDARY_KEY:-ctrl-o}"
 
-# Actions (popup, window, background_window)
+# Actions (popup, window, background_window, pane_horizontal, pane_vertical)
 # Note: These are global defaults; modules may have different defaults
 PRIMARY_ACTION="${PRIMARY_ACTION:-popup}"
 SECONDARY_ACTION="${SECONDARY_ACTION:-window}"
+
+# Direct action shortcuts (bypass primary/secondary)
+# Empty by default - users opt in by setting these
+POPUP_KEY="${POPUP_KEY:-}"
+WINDOW_KEY="${WINDOW_KEY:-}"
+BACKGROUND_WINDOW_KEY="${BACKGROUND_WINDOW_KEY:-}"
+PANE_HORIZONTAL_KEY="${PANE_HORIZONTAL_KEY:-}"
+PANE_VERTICAL_KEY="${PANE_VERTICAL_KEY:-}"
+
+# Action menu key (shows menu to select action)
+# Note: ctrl-m is the same as Enter in terminals, so we use ctrl-j by default
+ACTION_MENU_KEY="${ACTION_MENU_KEY:-ctrl-j}"
 
 # Taskrunner icons
 TASKRUNNER_ICON_RUNNING="${TASKRUNNER_ICON_RUNNING:-🔄}"
@@ -103,8 +116,12 @@ validate_shortcut() {
   # - FZF_RESERVED_KEYS: static keys used by fzf/nunchux
   # - PRIMARY_KEY: configured key for primary action (default: enter)
   # - SECONDARY_KEY: configured key for secondary action (default: ctrl-o)
+  # - Action keys: direct shortcuts for specific actions
+  # - ACTION_MENU_KEY: shows action selection menu
   # - "/": used for jump mode
-  for reserved in "${FZF_RESERVED_KEYS[@]}" "$PRIMARY_KEY" "$SECONDARY_KEY" "/"; do
+  for reserved in "${FZF_RESERVED_KEYS[@]}" "$PRIMARY_KEY" "$SECONDARY_KEY" \
+      "$POPUP_KEY" "$WINDOW_KEY" "$BACKGROUND_WINDOW_KEY" \
+      "$PANE_HORIZONTAL_KEY" "$PANE_VERTICAL_KEY" "$ACTION_MENU_KEY" "/"; do
     if [[ "$key" == "$reserved" ]]; then
       echo "Warning: shortcut key '$key' is reserved" >&2
       return 1
@@ -142,6 +159,20 @@ validate_keybindings() {
   if ! is_valid_fzf_key "$SECONDARY_KEY"; then
     invalid_keys+=("secondary_key: $SECONDARY_KEY")
   fi
+
+  # Validate action keys (only if non-empty)
+  [[ -n "$POPUP_KEY" ]] && ! is_valid_fzf_key "$POPUP_KEY" && \
+    invalid_keys+=("popup_key: $POPUP_KEY")
+  [[ -n "$WINDOW_KEY" ]] && ! is_valid_fzf_key "$WINDOW_KEY" && \
+    invalid_keys+=("window_key: $WINDOW_KEY")
+  [[ -n "$BACKGROUND_WINDOW_KEY" ]] && ! is_valid_fzf_key "$BACKGROUND_WINDOW_KEY" && \
+    invalid_keys+=("background_window_key: $BACKGROUND_WINDOW_KEY")
+  [[ -n "$PANE_HORIZONTAL_KEY" ]] && ! is_valid_fzf_key "$PANE_HORIZONTAL_KEY" && \
+    invalid_keys+=("pane_horizontal_key: $PANE_HORIZONTAL_KEY")
+  [[ -n "$PANE_VERTICAL_KEY" ]] && ! is_valid_fzf_key "$PANE_VERTICAL_KEY" && \
+    invalid_keys+=("pane_vertical_key: $PANE_VERTICAL_KEY")
+  [[ -n "$ACTION_MENU_KEY" ]] && ! is_valid_fzf_key "$ACTION_MENU_KEY" && \
+    invalid_keys+=("action_menu_key: $ACTION_MENU_KEY")
 
   if [[ ${#invalid_keys[@]} -gt 0 ]]; then
     echo "${invalid_keys[*]}"
@@ -281,6 +312,13 @@ parse_config() {
         primary_action) PRIMARY_ACTION="$value" ;;
         secondary_action) SECONDARY_ACTION="$value" ;;
         show_help) SHOW_HELP="$value" ;;
+        show_cwd) SHOW_CWD="$value" ;;
+        popup_key) POPUP_KEY="$value" ;;
+        window_key) WINDOW_KEY="$value" ;;
+        background_window_key) BACKGROUND_WINDOW_KEY="$value" ;;
+        pane_horizontal_key) PANE_HORIZONTAL_KEY="$value" ;;
+        pane_vertical_key) PANE_VERTICAL_KEY="$value" ;;
+        action_menu_key) ACTION_MENU_KEY="$value" ;;
         esac
       elif [[ "$current_section" == "taskrunner" ]]; then
         # Handle taskrunner defaults

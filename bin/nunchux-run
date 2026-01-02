@@ -134,6 +134,12 @@ nunchux_launch() {
   background_window)
     tmux new-window -d -n "$name" -c "$dir" "$NUNCHUX_BIN_DIR/nunchux-run" bash -c "$cmd"
     ;;
+  pane_horizontal)
+    tmux split-window -h -c "$dir" "$NUNCHUX_BIN_DIR/nunchux-run" bash -c "$cmd"
+    ;;
+  pane_vertical)
+    tmux split-window -v -c "$dir" "$NUNCHUX_BIN_DIR/nunchux-run" bash -c "$cmd"
+    ;;
   *)
     echo "nunchux_launch: unknown action '$action'" >&2
     return 1

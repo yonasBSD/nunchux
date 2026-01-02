@@ -64,6 +64,7 @@ The `[settings]` section controls global behavior:
 | `fzf_colors` | (see below) | fzf color scheme |
 | `cache_ttl` | `60` | Seconds before cache refresh (0 to disable) |
 | `exclude_patterns` | (see below) | Patterns to exclude from directory browsers |
+| `show_cwd` | `true` | Show current working directory in menu label |
 
 ### Maximum Dimensions
 
@@ -91,6 +92,8 @@ The percentage is calculated against the current tmux window size, then clamped 
 | `popup` | Open in a tmux popup overlay |
 | `window` | Open in a new tmux window with focus |
 | `background_window` | Open in a new tmux window, stay in current pane |
+| `pane_horizontal` | Open in a horizontal split pane |
+| `pane_vertical` | Open in a vertical split pane |
 
 Different item types have different default actions:
 
@@ -101,6 +104,54 @@ Different item types have different default actions:
 | Dirbrowsers | `popup` | `window` |
 
 You can override the default actions globally in `[settings]`, or per-item.
+
+### Direct Action Shortcuts
+
+In addition to primary/secondary keys, you can configure dedicated shortcuts that always trigger a specific action:
+
+| Setting | Description |
+|---------|-------------|
+| `popup_key` | Always open in popup |
+| `window_key` | Always open in window |
+| `background_window_key` | Always open in background window |
+| `pane_horizontal_key` | Always open in horizontal split |
+| `pane_vertical_key` | Always open in vertical split |
+
+These are disabled by default (empty). Enable the ones you want:
+
+```ini
+[settings]
+popup_key = ctrl-p
+window_key = ctrl-w
+background_window_key = ctrl-b
+pane_horizontal_key = ctrl-h
+pane_vertical_key = ctrl-v
+```
+
+When configured, these shortcuts appear in the help header (toggle with `Ctrl-/`):
+
+```
+Enter: popup | Ctrl-O: window | Ctrl-X: kill | Ctrl-H: hsplit | Ctrl-V: vsplit
+```
+
+These keys are reserved and cannot be used as item shortcuts.
+
+### Action Menu
+
+Press `Ctrl-J` (default) to open a menu for selecting how to launch the highlighted item. This provides quick access to all launch modes without configuring individual shortcuts.
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `action_menu_key` | `ctrl-j` | Key to open action selection menu |
+
+Set to empty to disable:
+
+```ini
+[settings]
+action_menu_key =
+```
+
+Note: `ctrl-m` cannot be used as it's equivalent to Enter in terminals.
 
 ### Default fzf_colors
 

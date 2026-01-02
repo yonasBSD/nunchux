@@ -22,6 +22,7 @@ fi
 # Load all library modules
 source "$NUNCHUX_LIB_DIR/utils.sh"
 source "$NUNCHUX_LIB_DIR/cache.sh"
+source "$NUNCHUX_LIB_DIR/action_menu.sh"
 source "$NUNCHUX_LIB_DIR/menu.sh"
 source "$NUNCHUX_LIB_DIR/config.sh"
 source "$NUNCHUX_LIB_DIR/migrate.sh"

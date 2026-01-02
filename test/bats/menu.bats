@@ -192,4 +192,25 @@ height = 60"
   assert_output_contains "echo hello"
 }
 
+@test "menu: field 3 contains app name (used by ctrl-x kill)" {
+  create_test_config "$TEMP_DIR/test" "[app:testapp]
+cmd = echo test
+shortcut = ctrl-t"
+
+  cd "$TEMP_DIR/test"
+  load_and_parse_config
+
+  run build_combined_menu ""
+  # Field 3 must be the app name - ctrl-x binding uses {3} to kill
+  local field3
+  field3=$(echo "$output" | grep testapp | cut -f3)
+  [[ "$field3" == "testapp" ]]
+}
+
+@test "menu: ctrl-x binding uses field 3 for kill" {
+  # The ctrl-x binding must use {3} to get the app name
+  # This catches regressions where field positions change
+  grep -q 'ctrl-x:reload.*--kill {3}' "$BATS_TEST_DIRNAME/../../bin/nunchux"
+}
+
 # vim: ft=bash ts=2 sw=2 et

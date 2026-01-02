@@ -2,6 +2,97 @@
 
 All notable changes to nunchux will be documented in this file.
 
+## [2.3.0]
+
+### Working Directory in Menu Label
+
+The menu now displays the current working directory in the border label, giving context for where commands will run:
+
+```
+nunchux (~/projects/myapp)
+```
+
+Submenus show both the submenu name and directory:
+
+```
+nunchux: system (~/projects/myapp)
+```
+
+This is enabled by default. To disable:
+
+```ini
+[settings]
+show_cwd = false
+```
+
+### Direct Action Shortcuts
+
+New keyboard shortcuts to open items in a specific mode, bypassing primary/secondary action settings:
+
+| Setting | Suggested Key | Action |
+|---------|---------------|--------|
+| `popup_key` | `ctrl-p` | Open in popup |
+| `window_key` | `ctrl-w` | Open in window |
+| `background_window_key` | `ctrl-b` | Open in background window |
+| `pane_horizontal_key` | `ctrl-h` | Open in horizontal split pane |
+| `pane_vertical_key` | `ctrl-v` | Open in vertical split pane |
+
+These are disabled by default. Configure only the ones you need:
+
+```ini
+[settings]
+# Just enable horizontal/vertical pane shortcuts
+pane_horizontal_key = ctrl-h
+pane_vertical_key = ctrl-v
+```
+
+Or enable all action shortcuts:
+
+```ini
+[settings]
+popup_key = ctrl-p
+window_key = ctrl-w
+background_window_key = ctrl-b
+pane_horizontal_key = ctrl-h
+pane_vertical_key = ctrl-v
+```
+
+Works on apps, taskrunners, and dirbrowser files. Configured shortcuts appear in the help header (toggle with `Ctrl-/`):
+
+```
+Enter: popup | Ctrl-O: window | Ctrl-X: kill | Ctrl-H: hsplit | Ctrl-V: vsplit
+```
+
+Note: These keys are reserved and cannot be used as item shortcuts.
+
+### Action Menu
+
+Press `ctrl-j` to open an action selection menu for the currently highlighted item. Choose how to open it:
+
+- Open in popup
+- Open in window
+- Open in background window
+- Open in horizontal split
+- Open in vertical split
+
+This provides quick access to all launch modes without needing to configure dedicated shortcuts for each action.
+
+The key is configurable:
+
+```ini
+[settings]
+action_menu_key = ctrl-j  # default
+```
+
+Set to empty to disable:
+
+```ini
+[settings]
+action_menu_key =
+```
+
+Note: `ctrl-m` cannot be used as it's equivalent to Enter in terminals.
+
 ## [2.2.1]
 
 ### Fixed menu sorting when no `[order]` section is defined

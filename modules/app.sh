@@ -166,13 +166,12 @@ app_launch() {
   # Check if this is one of our apps
   [[ -z "${APP_CMD[$name]:-}" ]] && return 1
 
-  # Determine action based on key pressed
+  # Resolve action from key press
   local action
-  if [[ "$key" == "$SECONDARY_KEY" ]]; then
-    action="${APP_SECONDARY_ACTION[$name]:-$SECONDARY_ACTION}"
-  else
-    action="${APP_PRIMARY_ACTION[$name]:-$PRIMARY_ACTION}"
-  fi
+  action=$(resolve_action "$key" "$name" \
+    "${APP_PRIMARY_ACTION[$name]:-$PRIMARY_ACTION}" \
+    "${APP_SECONDARY_ACTION[$name]:-$SECONDARY_ACTION}")
+  [[ "$action" == "$ACTION_CANCELLED" ]] && return 2
 
   # If app already running and action is not background, switch to it
   if is_app_running "$name" && [[ "$action" != "background_window" ]]; then

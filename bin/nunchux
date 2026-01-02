@@ -241,7 +241,10 @@ launch_by_shortcut() {
   else
     # Launch app with primary action
     local cmd="${APP_CMD[$item]:-}"
-    [[ -z "$cmd" ]] && { echo "Unknown item: $item" >&2; exit 1; }
+    [[ -z "$cmd" ]] && {
+      echo "Unknown item: $item" >&2
+      exit 1
+    }
     app_launch "$item" "" "$cmd" "${APP_WIDTH[$item]:-}" "${APP_HEIGHT[$item]:-}" "${APP_ON_EXIT[$item]:-}"
   fi
 }
@@ -386,6 +389,9 @@ build_menu() {
 
 # Main launcher using fzf
 launch() {
+  # Build border label (includes cwd if configured)
+  build_border_label "$CURRENT_MENU"
+
   # Check dependencies
   if ! check_fzf_version; then
     echo "Install fzf $FZF_MIN_VERSION+ from https://github.com/junegunn/fzf" >&2
@@ -430,8 +436,15 @@ launch() {
   # Build header (only shown when SHOW_SHORTCUTS is set)
   local header=""
   if [[ -n "$SHOW_SHORTCUTS" ]]; then
-    header="$primary_display: primary_action | $secondary_display: secondary_action | Ctrl-X: kill"
+    header="$primary_display: $PRIMARY_ACTION | $secondary_display: $SECONDARY_ACTION | Ctrl-X: kill"
     [[ -n "$CURRENT_MENU" ]] && header="$header | Esc: back"
+    # Add action shortcuts (same line)
+    [[ -n "$POPUP_KEY" ]] && header="$header | ${POPUP_KEY^}: popup"
+    [[ -n "$WINDOW_KEY" ]] && header="$header | ${WINDOW_KEY^}: window"
+    [[ -n "$BACKGROUND_WINDOW_KEY" ]] && header="$header | ${BACKGROUND_WINDOW_KEY^}: bg"
+    [[ -n "$PANE_HORIZONTAL_KEY" ]] && header="$header | ${PANE_HORIZONTAL_KEY^}: hsplit"
+    [[ -n "$PANE_VERTICAL_KEY" ]] && header="$header | ${PANE_VERTICAL_KEY^}: vsplit"
+    [[ -n "$ACTION_MENU_KEY" ]] && header="$header | ${ACTION_MENU_KEY^}: actions"
   fi
 
   if [[ -n "$CURRENT_MENU" ]]; then
@@ -443,8 +456,11 @@ launch() {
   cache_ttl="$MENU_CACHE_TTL"
 
   if [[ -z "$CURRENT_MENU" ]]; then
-    cache_file=$(cache_file "main-menu")
-    socket=$(cache_socket "main-menu")
+    # Include cwd hash in cache key (items are directory-dependent)
+    local cwd_hash
+    cwd_hash=$(printf '%s' "$PWD" | md5sum | cut -c1-8)
+    cache_file=$(cache_file "main-menu-$cwd_hash")
+    socket=$(cache_socket "main-menu-$cwd_hash")
   else
     cache_file=$(cache_file "submenu" "$CURRENT_MENU")
     socket=$(cache_socket "submenu" "$CURRENT_MENU")
@@ -454,7 +470,7 @@ launch() {
   # Build fzf options
   local fzf_opts
   build_fzf_opts fzf_opts "$header"
-  fzf_opts+=(--bind="ctrl-x:reload($script_path --kill {2} >/dev/null 2>&1; $reload_cmd)")
+  fzf_opts+=(--bind="ctrl-x:reload($script_path --kill {3} >/dev/null 2>&1; $reload_cmd)")
 
   # Add shortcut bindings
   local shortcut_binds=()
@@ -742,7 +758,6 @@ main() {
   --submenu)
     shift
     CURRENT_MENU="$1"
-    FZF_BORDER_LABEL=" $NUNCHUX_LABEL: $CURRENT_MENU "
     if ! launch 2>&1; then
       echo "Press any key to close..."
       read -n 1
@@ -754,7 +769,6 @@ main() {
     shift
     if [[ "${1:-}" == "--submenu" ]]; then
       CURRENT_MENU="$2"
-      FZF_BORDER_LABEL=" $NUNCHUX_LABEL: $CURRENT_MENU "
     fi
     if ! launch 2>&1; then
       echo "Press any key to close..."
@@ -766,7 +780,6 @@ main() {
     shift
     if [[ "${1:-}" == "--submenu" ]]; then
       CURRENT_MENU="$2"
-      FZF_BORDER_LABEL=" $NUNCHUX_LABEL: $CURRENT_MENU "
     fi
     if ! launch 2>&1; then
       echo "Press any key to close..."
