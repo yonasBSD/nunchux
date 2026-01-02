@@ -2,6 +2,14 @@
 
 All notable changes to nunchux will be documented in this file.
 
+## [2.2.1]
+
+### Fixed menu sorting when no `[order]` section is defined
+
+- Items now sort alphabetically (apps, menus, dirbrowsers first, then taskrunners)
+- Taskrunner items stay grouped by runner instead of being interleaved by task name
+- Taskrunner dividers now appear directly before their items, not grouped at the top
+
 ## [2.2.0]
 
 ### Keyboard Shortcuts

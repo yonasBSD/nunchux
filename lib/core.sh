@@ -122,9 +122,11 @@ build_combined_menu() {
       if [[ -n "$found_runner" ]]; then
         local runner_order
         runner_order=$(_get_order_key "taskrunner:$found_runner")
-        # Dividers get runner order * 100 - 1 to appear before runner items
-        order_keys+=("$((runner_order * 100 - 1))")
-        alpha_keys+=("$divider_label")
+        # Taskrunners default to 20000 (below apps/menus/dirbrowsers at 10000)
+        [[ "$runner_order" == "10000" ]] && runner_order=20000
+        # Same order as items; alpha "runner" < "runner:task" so divider comes first
+        order_keys+=("$((runner_order * 100))")
+        alpha_keys+=("$found_runner")
       else
         order_keys+=("999999")
         alpha_keys+=("zzz")
@@ -160,8 +162,11 @@ build_combined_menu() {
         # Taskrunner item - sort by runner order (lookup taskrunner:$runner in MAIN_ORDER)
         local runner_order
         runner_order=$(_get_order_key "taskrunner:$prefix")
+        # Taskrunners default to 20000 (below apps/menus/dirbrowsers at 10000)
+        [[ "$runner_order" == "10000" ]] && runner_order=20000
         order_keys+=("$((runner_order * 100))")
-        alpha_keys+=("${item_name#*:}")
+        # Use full item name (runner:task) to keep same-runner tasks grouped
+        alpha_keys+=("$item_name")
       else
         # Regular app with / in name (submenu child)
         order_name="$item_name"
@@ -180,18 +185,18 @@ build_combined_menu() {
     fi
   done
 
-  # Create array of "order:alpha:index" for sorting
+  # Create array of "order\talpha\tindex" for sorting (tab-delimited to avoid : in names)
   local -a sort_pairs=()
   for i in "${!menu_lines[@]}"; do
-    sort_pairs+=("${order_keys[$i]}:${alpha_keys[$i]}:$i")
+    sort_pairs+=("${order_keys[$i]}"$'\t'"${alpha_keys[$i]}"$'\t'"$i")
   done
 
   # Sort by order (numeric), then by alpha (for unlisted items)
   local sorted
-  sorted=$(printf '%s\n' "${sort_pairs[@]}" | sort -t: -k1,1n -k2,2)
+  sorted=$(printf '%s\n' "${sort_pairs[@]}" | sort -t$'\t' -k1,1n -k2,2)
 
   # Output in sorted order
-  while IFS=: read -r _order _alpha idx; do
+  while IFS=$'\t' read -r _order _alpha idx; do
     echo "${menu_lines[$idx]}"
   done <<<"$sorted"
 }

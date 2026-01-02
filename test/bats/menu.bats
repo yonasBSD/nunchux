@@ -41,24 +41,26 @@ cmd = echo 3"
   assert_output_contains "third"
 }
 
-@test "menu: order property affects item order" {
-  create_test_config "$TEMP_DIR/test" "[app:should-be-last]
-order = 100
-cmd = echo last
+@test "menu: apps sorted alphabetically when no [order] section" {
+  # Without [order], items should sort alphabetically
+  create_test_config "$TEMP_DIR/test" "[app:zebra]
+cmd = echo z
 
-[app:should-be-first]
-order = 10
-cmd = echo first"
+[app:apple]
+cmd = echo a
+
+[app:mango]
+cmd = echo m"
 
   cd "$TEMP_DIR/test"
   load_and_parse_config
 
   run build_combined_menu ""
-  # First should appear before last
-  local first_pos last_pos
-  first_pos=$(echo "$output" | grep -n "should-be-first" | cut -d: -f1)
-  last_pos=$(echo "$output" | grep -n "should-be-last" | cut -d: -f1)
-  [[ "$first_pos" -lt "$last_pos" ]]
+  # Extract item names in order
+  local items
+  items=$(echo "$output" | cut -f3 | tr '\n' ' ')
+  # Should be alphabetical: apple mango zebra
+  [[ "$items" == "apple mango zebra " ]]
 }
 
 # =============================================================================
