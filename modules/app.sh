@@ -163,8 +163,8 @@ app_launch() {
   local height="$5"
   local on_exit="$6"
 
-  # Check if this is one of our apps
-  [[ -z "${APP_CMD[$name]:-}" ]] && return 1
+  # Check if this is one of our apps (guard against empty name first)
+  [[ -z "$name" || -z "${APP_CMD[$name]:-}" ]] && return 1
 
   # Resolve action from key press
   local action
