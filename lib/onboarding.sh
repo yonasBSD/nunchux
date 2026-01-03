@@ -13,6 +13,9 @@
 [[ -n "${NUNCHUX_LIB_ONBOARDING_LOADED:-}" ]] && return
 NUNCHUX_LIB_ONBOARDING_LOADED=1
 
+# Load config_templates.sh (lazy-loaded together with onboarding)
+source "$NUNCHUX_LIB_DIR/config_templates.sh"
+
 # ============================================================================
 # Shared box drawing helpers
 # ============================================================================

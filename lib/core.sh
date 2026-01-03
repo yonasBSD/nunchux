@@ -34,7 +34,7 @@ source "$NUNCHUX_LIB_DIR/config.sh"
 source "$NUNCHUX_LIB_DIR/preflight.sh"
 # Note: migrate.sh is loaded lazily only when migration is needed
 # Note: error_screens.sh is loaded lazily only when errors occur
-source "$NUNCHUX_LIB_DIR/config_templates.sh"
+# Note: config_templates.sh is loaded lazily with onboarding.sh
 # Note: onboarding.sh is loaded lazily in bin/nunchux only when needed
 
 # Load nunchux-run for nunchux_launch function
