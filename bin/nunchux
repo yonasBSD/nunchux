@@ -53,6 +53,7 @@ load_modules
 # Run pre-flight dependency checks BEFORE anything else
 declare -A PREFLIGHT_FAILURES=()
 if ! run_preflight_checks PREFLIGHT_FAILURES; then
+  source "$NUNCHUX_LIB_DIR/error_screens.sh"
   show_setup_error "dependency" PREFLIGHT_FAILURES
 fi
 
@@ -82,51 +83,14 @@ if [[ "${SHOW_HELP:-true}" == "true" ]]; then
   SHOW_SHORTCUTS=1
 fi
 
-# Show invalid keybinding error
-show_invalid_key_error() {
-  local invalid_key="$1"
-  echo ""
-  echo -e "\033[1;33mChuck Norris's keyboard doesn't have a Ctrl key. He's always in control.\033[0m"
-  echo -e "\033[90mbut your keyboard needs valid bindings...\033[0m"
-  echo ""
-  echo -e "\033[1;31mUnsupported key: $invalid_key\033[0m"
-  echo ""
-  echo "Keys like shift-enter and ctrl-enter are not supported by terminals."
-  echo ""
-  echo "Good alternatives: alt-enter, ctrl-s, tab, ctrl-o"
-  echo ""
-  echo "See: https://man.archlinux.org/man/fzf.1.en"
-  echo ""
-  echo "Press any key..."
-  read -n 1 -s
-  exit 0
-}
-
 # Validate keybindings before proceeding
-invalid_keys=$(validate_keybindings) || show_invalid_key_error "$invalid_keys"
+if ! invalid_keys=$(validate_keybindings); then
+  source "$NUNCHUX_LIB_DIR/error_screens.sh"
+  show_invalid_key_error "$invalid_keys"
+fi
 
 # Load enabled taskrunners
 load_taskrunners
-
-# Show invalid shortcut error
-show_invalid_shortcut_error() {
-  local errors="$1"
-  echo ""
-  echo -e "\033[1;33mChuck Norris can trigger any shortcut with just a stare.\033[0m"
-  echo -e "\033[90mbut you need valid ones...\033[0m"
-  echo ""
-  echo -e "\033[1;31mInvalid shortcuts:\033[0m"
-  echo ""
-  while IFS= read -r err; do
-    [[ -n "$err" ]] && echo "  $err"
-  done <<<"$errors"
-  echo ""
-  echo "Reserved keys: enter, esc, ctrl-x, /, $PRIMARY_KEY, $SECONDARY_KEY"
-  echo ""
-  echo "Press any key..."
-  read -n 1 -s
-  exit 0
-}
 
 # Register all shortcuts after config is fully parsed
 register_all_shortcuts() {
@@ -167,6 +131,7 @@ register_all_shortcuts() {
   unset -f _try_register
 
   if [[ -n "$errors" ]]; then
+    source "$NUNCHUX_LIB_DIR/error_screens.sh"
     show_invalid_shortcut_error "$errors"
   fi
 }

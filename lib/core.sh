@@ -33,7 +33,7 @@ source "$NUNCHUX_LIB_DIR/menu.sh"
 source "$NUNCHUX_LIB_DIR/config.sh"
 source "$NUNCHUX_LIB_DIR/migrate.sh"
 source "$NUNCHUX_LIB_DIR/preflight.sh"
-source "$NUNCHUX_LIB_DIR/error_screens.sh"
+# Note: error_screens.sh is loaded lazily only when errors occur
 source "$NUNCHUX_LIB_DIR/config_templates.sh"
 # Note: onboarding.sh is loaded lazily in bin/nunchux only when needed
 
