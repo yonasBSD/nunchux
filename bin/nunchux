@@ -61,8 +61,14 @@ show_error_screen() {
 
 trap 'show_error_screen "$LINENO" "$BASH_COMMAND"' ERR
 
-# Determine script directory
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Determine script directory (avoid subprocess if possible)
+if [[ "${BASH_SOURCE[0]}" == /* ]]; then
+  # Absolute path - use parameter expansion (no subprocess)
+  SCRIPT_DIR="${BASH_SOURCE[0]%/*}"
+else
+  # Relative path - need to resolve
+  SCRIPT_DIR="$(cd "${BASH_SOURCE[0]%/*}" && pwd)"
+fi
 
 # Clear shortcut display state (set via --show-shortcuts flag only)
 unset SHOW_SHORTCUTS
