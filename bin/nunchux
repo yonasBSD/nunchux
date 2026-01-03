@@ -476,11 +476,11 @@ launch() {
   cache_ttl="$MENU_CACHE_TTL"
 
   if [[ -z "$CURRENT_MENU" ]]; then
-    # Include cwd hash in cache key (items are directory-dependent)
-    local cwd_hash
-    cwd_hash=$(printf '%s' "$PWD" | md5sum | cut -c1-8)
-    cache_file=$(cache_file "main-menu-$cwd_hash")
-    socket=$(cache_socket "main-menu-$cwd_hash")
+    # Include cwd in cache key (items are directory-dependent)
+    # Use parameter expansion instead of md5sum subprocess
+    local cwd_safe="${PWD//\//_}"
+    cache_file=$(cache_file "main-menu-$cwd_safe")
+    socket=$(cache_socket "main-menu-$cwd_safe")
   else
     cache_file=$(cache_file "submenu" "$CURRENT_MENU")
     socket=$(cache_socket "submenu" "$CURRENT_MENU")
