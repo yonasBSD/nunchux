@@ -82,10 +82,16 @@ check_and_migrate_config || exit 0
 # Check for old order format and offer migration
 check_and_migrate_order_config || exit 0
 
-# Load and parse config
+# Load and parse config (or use cache if valid)
 config_file=$(get_config_file)
 if [[ -n "$config_file" ]]; then
-  parse_config "$config_file"
+  _config_cache="$NUNCHUX_CACHE_DIR/config-${config_file//\//_}.cache"
+  if is_config_cache_valid "$config_file" "$_config_cache"; then
+    source "$_config_cache"
+  else
+    parse_config "$config_file"
+    _NUNCHUX_SAVE_CONFIG_CACHE=1
+  fi
 fi
 
 # Initialize help display state from config (can be toggled with ctrl-/)
@@ -226,6 +232,12 @@ register_all_shortcuts() {
 }
 
 register_all_shortcuts
+
+# Save config cache if we just parsed the config file
+if [[ -n "${_NUNCHUX_SAVE_CONFIG_CACHE:-}" && -n "${_config_cache:-}" ]]; then
+  save_config_cache "$_config_cache"
+  unset _NUNCHUX_SAVE_CONFIG_CACHE
+fi
 
 # Launch an item by shortcut
 launch_by_shortcut() {
@@ -738,8 +750,8 @@ main() {
     local width="${MAX_MENU_WIDTH:-$MENU_WIDTH}"
     local height="${MAX_MENU_HEIGHT:-$MENU_HEIGHT}"
 
-    local script_path
-    script_path=$(realpath "${BASH_SOURCE[0]}")
+    # Use SCRIPT_DIR instead of calling realpath
+    local script_path="$SCRIPT_DIR/nunchux"
     local dir
     dir=$(tmux display-message -p '#{pane_current_path}')
 
