@@ -149,6 +149,9 @@ fi
 launch_by_shortcut() {
   local item="$1"
 
+  # Lazy-load nunchux-run before launching
+  [[ -z "${NUNCHUX_RUN_LOADED:-}" ]] && { source "$NUNCHUX_BIN_DIR/nunchux-run"; NUNCHUX_RUN_LOADED=1; }
+
   if [[ "$item" == menu:* ]]; then
     # Enter submenu
     CURRENT_MENU="${item#menu:}"
@@ -361,6 +364,9 @@ launch() {
   if [[ $(type -t handle_onboarding_item) == "function" ]] && handle_onboarding_item "$name" "$cmd"; then
     return 0
   fi
+
+  # Lazy-load nunchux-run before launching
+  [[ -z "${NUNCHUX_RUN_LOADED:-}" ]] && { source "$NUNCHUX_BIN_DIR/nunchux-run"; NUNCHUX_RUN_LOADED=1; }
 
   # Try each module until one handles it
   local handled=false

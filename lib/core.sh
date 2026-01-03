@@ -36,9 +36,7 @@ source "$NUNCHUX_LIB_DIR/preflight.sh"
 # Note: error_screens.sh is loaded lazily only when errors occur
 # Note: config_templates.sh is loaded lazily with onboarding.sh
 # Note: onboarding.sh is loaded lazily in bin/nunchux only when needed
-
-# Load nunchux-run for nunchux_launch function
-source "$NUNCHUX_BIN_DIR/nunchux-run"
+# Note: nunchux-run is loaded lazily when first item is launched
 
 # Module registry (declare -g for global scope)
 declare -ga LOADED_MODULES=()
