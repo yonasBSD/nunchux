@@ -1,0 +1,19 @@
+# Demo justfile for nunchux
+
+hello:
+    @echo ""
+    @echo "  _   _ _   _ _   _  ____ _   _ _   ___  __"
+    @echo " | \ | | | | | \ | |/ ___| | | | | | \ \/ /"
+    @echo " |  \| | | | |  \| | |   | |_| | | | |\  / "
+    @echo " | |\  | |_| | |\  | |___|  _  | |_| |/  \ "
+    @echo " |_| \_|\___/|_| \_|\____|_| |_|\___//_/\_\\"
+    @echo ""
+    @echo "  Let the work flow"
+    @echo ""
+    @echo "  (See the build icon in the window title? 🔄 (Configurable.)"
+    @echo ""
+    @sleep 5
+    @echo "  Aaaand we're done."
+    @echo "  Now, check the done icon. ✅ (Also configurable.)"
+    @echo "  Launching the same task again before closing the window will reuse the window."
+    @echo ""

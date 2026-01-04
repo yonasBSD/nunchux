@@ -34,7 +34,7 @@ appear when the relevant files are detected (justfile, package.json, Taskfile.ym
 
 ## What it looks like
 
-![nunchux demo](docs/demo.gif)
+[![nunchux demo](https://vhs.charm.sh/vhs-4H4NyQC5bYtYGpNkb6vIaH.gif)](https://vhs.charm.sh/vhs-4H4NyQC5bYtYGpNkb6vIaH.gif)
 
 ## How to install it
 
