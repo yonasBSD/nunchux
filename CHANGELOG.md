@@ -2,6 +2,37 @@
 
 All notable changes to nunchux will be documented in this file.
 
+## [2.5.0]
+
+### Bug Fixes
+
+- **Fixed action menu not working** - Variable scoping bug in `_nunchux_apply_env()` caused the selected item name to be lost when using ctrl-j action menu or other shortcuts. The `while read` loop was overwriting the outer `$name` variable.
+- **Fixed empty selection crash** - Added guards against empty item names in launch functions, preventing "bad array subscript" errors.
+- **Fixed duplicate taskrunner loading** - Taskrunners were being loaded twice in some scenarios.
+
+### Performance Improvements
+
+Additional lazy loading to reduce startup time:
+
+- `nunchux-run.sh` - Only loaded when launching items
+- `config_templates.sh` - Only loaded during onboarding
+- `migration.sh` - Only loaded when migration is needed
+
+### Improvements
+
+- **Better onboarding experience** - Improved first-run setup flow
+- **Centralized error screens** - Consistent error display across all error conditions
+
+### Test Suite
+
+New comprehensive test framework with 30+ test cases:
+
+- **Automated tests** - Menu output validation, config parsing, taskrunner detection
+- **Visual tests** - Action types (popup, window, panes), keybindings, overrides
+- **Semi-automated tests** - Pane position verification, background window behavior
+
+Run tests with `./test/run_tests.sh` or interactively with `./test/run_tests.sh -i`.
+
 ## [2.4.0]
 
 ### Performance Improvements
