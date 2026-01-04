@@ -17,7 +17,7 @@
 
 # Apply parent environment from tmux's NUNCHUX_ENV_FILE
 _nunchux_apply_env() {
-  local env_file
+  local env_file name value
 
   # Get env file path from tmux environment (set by keybinding)
   env_file=$(tmux show-environment NUNCHUX_ENV_FILE 2>/dev/null | cut -d= -f2)
