@@ -1,38 +1,35 @@
-# nunchux :-)
+# Nunchux :-)
 
-A smart tmux app launcher that gives you quick access to your favorite TUI apps
-and project tasks. Think of it as a command palette for your terminal life.
+A tmux launcher for your often used apps, files, and build tasks.
 
 ## What it can do
 
-Launch your apps in popups or windows, and switch to them if they're already
-running. No more hunting through tmux windows to find where you left lazygit.
+Invoke nunchux with a shortcut (default: `prefix + g`) to get a fuzzy-searchable
+list of your configured:
 
-* Show running status for each app (● running, ○ stopped)
-* Configurable actions: open in popup, window, or background window
-* Switch to running apps instead of opening duplicates
-* Kill running apps with Ctrl-X
-* Dynamic status info (git changes, docker containers, system load, etc.)
+- **apps**: whatever that may mean to you; TUI app, setting an env var, running
+  a script.
 
-### Task runner integrations
+- **submenues**: groupings of apps, maybe collect system and/or news apps in a
+submenu.
 
-Nunchux has built-in task runners that auto-detect project tools and show tasks
-right in the menu. Tasks run in dedicated tmux windows with status indicators:
+- **directory browsers**: quick editing of often used files and directories.
+Good for dotfiles.
 
-* `just » build 🔄` - running
-* `just » build ✅` - completed successfully
-* `just » build ❌` - failed
+- **task runner**: quick access to task runner tasks from justfile,
+package.json, taskfile.
 
-Built-in task runners:
-
-* **just** - Justfile recipes (requires [just](https://github.com/casey/just))
-* **npm** - package.json scripts (requires npm)
-* **task** - Taskfile tasks (requires [task](https://taskfile.dev/) or go-task)
-
-Task runners are disabled by default. Enable them in your config and they'll
-appear when the relevant files are detected (justfile, package.json, Taskfile.yml).
+For each app or submenu it is possible to configure a status message. The
+message can be static or dynamic. Are you already now thinking it will be dog
+slow? Don't worry, nunchux uses caching to keep things snappy.
 
 ## What it looks like
+
+### Screenshot
+
+![nunchux screenshot](demos/screenshot.png)
+
+### Gif
 
 [![nunchux demo](https://vhs.charm.sh/vhs-4H4NyQC5bYtYGpNkb6vIaH.gif)](https://vhs.charm.sh/vhs-4H4NyQC5bYtYGpNkb6vIaH.gif)
 
@@ -64,119 +61,23 @@ If you want to invoke it without the prefix, e.g. with `Ctrl-Space`:
 set -g @nunchux-key 'C-Space'
 ```
 
-## Configuring your apps
+## How to configure it
 
 Nunchux searches for config in this order:
 
-1. `.nunchuxrc` in current directory (or any parent, like `.gitignore`)
-2. `NUNCHUX_RC_FILE` environment variable
+1. `.nunchuxrc` in current directory or any parent.
+2. `NUNCHUX_RC_FILE` environment variable.
 3. `~/.config/nunchux/config`
 
-Or just run `nunchux` without a config and it will offer to create one for you.
+You can also run nunchux without a config and it will offer to create one for
+you.
 
-See [docs/configuration.md](docs/configuration.md) for the full reference and
-[docs/examples.md](docs/examples.md) for real-world examples.
+### Also see
 
-```ini
-[settings]
-icon_running = ●
-icon_stopped = ○
-menu_width = 60%
-menu_height = 50%
-popup_width = 90%
-popup_height = 90%
-primary_action = popup
-secondary_action = window
+- [docs/configuration.md](docs/configuration.md) for the full reference.
+- [docs/examples.md](docs/examples.md) for real-world examples.
 
-[app:btop]
-cmd = btop
-status = load=$(cut -d' ' -f1 /proc/loadavg); echo "load: $load"
-
-[app:git]
-cmd = lazygit
-primary_action = window   # Always open lazygit in a window
-status = n=$(git status -s 2>/dev/null | wc -l); [[ $n -gt 0 ]] && echo "($n changed)"
-
-[app:docker]
-cmd = lazydocker
-status = n=$(docker ps -q 2>/dev/null | wc -l); [[ $n -gt 0 ]] && echo "($n running)"
-
-[app:notes]
-cmd = nvim ~/notes
-width = 80
-height = 60
-
-[taskrunner:just]
-enabled = true
-
-[taskrunner:npm]
-enabled = true
-primary_action = background_window  # Run npm tasks in background
-```
-
-### Available options
-
-In `[settings]`:
-
-* `icon_running` / `icon_stopped` - status indicators
-* `menu_width` / `menu_height` - dimensions for the nunchux menu popup
-* `popup_width` / `popup_height` - default dimensions for app popups
-* `primary_key` / `secondary_key` - keybindings (default: enter/ctrl-o)
-* `primary_action` / `secondary_action` - what happens on keypress (see below)
-* `fzf_*` - customize fzf appearance
-
-**Action types:** `popup` (tmux popup), `window` (new window with focus), `background_window` (new window, stay in current pane)
-
-Default actions by type:
-
-* Apps: `popup` / `window`
-* Taskrunners: `window` / `background_window`
-* Dirbrowsers: `popup` / `window`
-
-Per app (`[app:name]`):
-
-* `cmd` - command to run (required)
-* `desc` - description shown in menu
-* `width` / `height` - popup dimensions for this app
-* `status` - shell command for dynamic status
-* `status_script` - path to script for complex status
-* `primary_action` / `secondary_action` - override global action for this app
-
-### Line continuation
-
-For long status commands, use `\` to continue on the next line:
-
-```ini
-[btop]
-cmd = btop
-status = load=$(cut -d' ' -f1 /proc/loadavg); \
-         ram=$(free -g | awk '/Mem/{print $7}'); \
-         echo "load: $load | ram: ${ram}GB"
-```
-
-### Helper functions
-
-Nunchux provides helper functions you can use in status commands:
-
-* `ago <file>` - relative modification time (`5s ago`, `3m ago`, `2h ago`, `7d ago`)
-* `lines <file>` - line count with pluralization (`1 line`, `42 lines`)
-* `nearest <file>` - find file by traversing upward from current directory
-
-```ini
-[config]
-cmd = nvim ~/.config/nunchux/config
-status = echo "($(ago ~/.config/nunchux/config))"
-
-[todos]
-cmd = nvim ~/todos.md
-status = echo "($(lines ~/todos.md))"
-
-[notes]
-cmd = bash -c 'f=$(nearest notes.md) && exec nvim "$f" || echo "Not found"'
-status = f=$(nearest notes.md) && echo "($(lines "$f"), $(ago "$f"))"
-```
-
-## Shell Integration (optional)
+### Shell Integration
 
 If you use nvm, pyenv, or other tools that modify your shell environment, you'll
 want apps launched via nunchux to inherit that environment.
@@ -215,14 +116,14 @@ This saves your environment after each command, so apps launched from nunchux
 
 ## Dependencies
 
-* tmux (duh)
-* fzf v0.66+
-* curl (for menu hot-swap)
+- tmux
+- fzf v0.66+
+- curl (for menu hot-swap)
 
-### Optional dependencies
+### Task runner dependencies
 
-* jq (for npm/task runner)
-* just (for justfile runner)
-* task or go-task (for Taskfile runner)
-
-<!-- vim: set ft=markdown ts=2 sw=2 et : -->
+| Task Runner | Required |
+|-------------|----------|
+| just | [just](https://github.com/casey/just) |
+| npm | jq |
+| task | [task](https://taskfile.dev) or go-task, jq |

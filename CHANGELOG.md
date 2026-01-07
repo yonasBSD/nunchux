@@ -2,6 +2,17 @@
 
 All notable changes to nunchux will be documented in this file.
 
+## [2.6.0]
+
+### New Features
+
+- **Configurable shortcut toggle key** - The key to toggle shortcut visibility is now configurable via `toggle_shortcuts_key` setting. Default remains `ctrl-/`.
+
+```ini
+[settings]
+toggle_shortcuts_key = ctrl-t
+```
+
 ## [2.5.1]
 
 ### Bug Fixes
