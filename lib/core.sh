@@ -228,33 +228,4 @@ get_current_dir() {
   tmux display-message -p '#{pane_current_path}' 2>/dev/null || pwd
 }
 
-# Chuck Norris programming facts (for error screens)
-CHUCK_FACTS=(
-  "Chuck Norris can unit test entire applications with a single assert."
-  "Chuck Norris doesn't use web frameworks. The internet obeys him."
-  "Chuck Norris can delete the root folder and still boot."
-  "Chuck Norris's code doesn't follow conventions. Conventions follow his code."
-  "Chuck Norris can instantiate an abstract class."
-  "Chuck Norris doesn't need sudo. The system always trusts him."
-  "Chuck Norris can divide by zero."
-  "When Chuck Norris throws an exception, nothing can catch it."
-  "Chuck Norris's keyboard doesn't have a Ctrl key. He's always in control."
-  "Chuck Norris can compile syntax errors."
-  "Chuck Norris doesn't need garbage collection. Memory is too afraid to leak."
-  "Chuck Norris can read from /dev/null."
-  "Chuck Norris finished World of Warcraft."
-  "Chuck Norris can write infinite loops that finish in under 2 seconds."
-  "Chuck Norris's code is self-documenting. In binary."
-  "Chuck Norris doesn't pair program. The code pairs with him."
-  "When Chuck Norris git pushes, the remote pulls."
-  "Chuck Norris can access private methods. Publicly."
-  "Chuck Norris doesn't get compiler errors. The compiler gets Chuck Norris errors."
-  "Chuck Norris can make a class that is both abstract and final."
-)
-
-# Get a random Chuck Norris fact
-random_chuck_fact() {
-  echo "${CHUCK_FACTS[$RANDOM % ${#CHUCK_FACTS[@]}]}"
-}
-
 # vim: ft=bash ts=2 sw=2 et
