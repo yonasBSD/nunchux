@@ -47,8 +47,6 @@ The `[settings]` section controls global behavior:
 | `icon_stopped` | `○` | Icon shown next to stopped apps |
 | `menu_width` | `60%` | Width of the app selector menu |
 | `menu_height` | `50%` | Height of the app selector menu |
-| `max_menu_width` | (none) | Maximum menu width in columns |
-| `max_menu_height` | (none) | Maximum menu height in rows |
 | `popup_width` | `90%` | Default width for app popups |
 | `popup_height` | `90%` | Default height for app popups |
 | `max_popup_width` | (none) | Maximum popup width in columns |
@@ -67,16 +65,14 @@ The `[settings]` section controls global behavior:
 | `show_cwd` | `true` | Show current working directory in menu label |
 | `toggle_shortcuts_key` | `ctrl-/` | Key to toggle shortcut column visibility |
 
-### Maximum Dimensions
+### Dimensions
 
-On large screens, percentage-based dimensions can result in overly large popups. Use `max_menu_*` and `max_popup_*` settings to cap dimensions:
+Dimensions can be specified as percentages or absolute values:
 
 ```ini
 [settings]
-menu_width = 60%
-menu_height = 50%
-max_menu_width = 120    # Cap menu at 120 columns
-max_menu_height = 40    # Cap menu at 40 rows
+menu_width = 60         # 60 columns (use 60% for percentage)
+menu_height = 50%       # 50% of terminal height
 
 popup_width = 90%
 popup_height = 90%
@@ -84,7 +80,7 @@ max_popup_width = 160   # Cap app popups at 160 columns
 max_popup_height = 50   # Cap app popups at 50 rows
 ```
 
-The percentage is calculated against the current tmux window size, then clamped to the maximum if exceeded.
+On large screens, percentage-based dimensions can result in overly large app popups. Use `max_popup_*` settings to cap dimensions. The percentage is calculated against the current tmux window size, then clamped to the maximum if exceeded. This applies to app popups and dirbrowser popups, not to the menu itself.
 
 ### Action Types
 

@@ -1,1 +1,5 @@
 .claude
+
+# Downloaded Go binary (fetched from GitHub Releases)
+bin/nunchux
+bin/.platform

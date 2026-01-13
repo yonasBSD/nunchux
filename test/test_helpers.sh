@@ -46,7 +46,7 @@ fail() {
 
 # Get menu output from nunchux
 get_menu() {
-  (cd "$TEST_DIR" && NUNCHUX_RC_FILE="$CONFIG_FILE" "$NUNCHUX_BIN" --menu 2>/dev/null)
+  (cd "$TEST_DIR" && NUNCHUX_RC_FILE="$CONFIG_FILE" NUNCHUX_CWD="$TEST_DIR" "$NUNCHUX_BIN" --menu 2>/dev/null)
 }
 
 # Run nunchux with test config (direct - tmux may capture some keys)

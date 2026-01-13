@@ -57,8 +57,8 @@ run_test() {
     return 0
   fi
 
-  # Run the test script
-  if bash "$test_script"; then
+  # Run the test script from its directory (needed for taskrunner tests)
+  if (cd "$test_dir" && bash "$test_script"); then
     ((PASS_COUNT++)) || true
   else
     ((FAIL_COUNT++)) || true

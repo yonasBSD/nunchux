@@ -2,6 +2,24 @@
 
 All notable changes to nunchux will be documented in this file.
 
+## [3.0.0] - Complete Rewrite in Go
+
+This release is a complete rewrite of nunchux from Bash to Go, delivering significant performance improvements while maintaining full feature compatibility.
+
+### Performance
+
+**~5x faster startup** - Benchmarked at 23ms vs 117ms for the Bash version. The menu now appears nearly instantly.
+
+### Upgrading
+
+```
+prefix + U
+```
+
+TPM will download the new Go binary automatically. Your existing config works unchanged.
+
+---
+
 ## [2.6.0]
 
 ### New Features

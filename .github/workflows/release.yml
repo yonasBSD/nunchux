@@ -1,0 +1,33 @@
+name: Release
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - name: Build
+        run: |
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+          go build -o nunchux-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/nunchux
+      - name: Attach binary to release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: nunchux-${{ matrix.goos }}-${{ matrix.goarch }}
