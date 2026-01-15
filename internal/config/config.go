@@ -354,8 +354,49 @@ func expandHome(path string) string {
 	return path
 }
 
+// ConfigResult contains the result of FindConfigFile
+type ConfigResult struct {
+	Path    string // Path to config file, empty if not found
+	IsLocal bool   // True if found via directory search (needs trust verification)
+}
+
 // FindConfigFile searches for config file in priority order
-func FindConfigFile() (string, error) {
+// Returns ConfigResult with IsLocal=true for configs found via upward directory search
+func FindConfigFile() (ConfigResult, error) {
+	// 1. Environment variable (explicitly set, trusted)
+	if envFile := os.Getenv("NUNCHUX_RC_FILE"); envFile != "" {
+		if _, err := os.Stat(envFile); err == nil {
+			return ConfigResult{Path: envFile, IsLocal: false}, nil
+		}
+	}
+
+	// 2. Search upward for .nunchuxrc (needs trust verification)
+	cwd, err := os.Getwd()
+	if err == nil {
+		for dir := cwd; dir != "/" && dir != "."; dir = filepath.Dir(dir) {
+			rc := filepath.Join(dir, ".nunchuxrc")
+			if _, err := os.Stat(rc); err == nil {
+				return ConfigResult{Path: rc, IsLocal: true}, nil
+			}
+		}
+	}
+
+	// 3. XDG config (in home directory, trusted)
+	configDir := os.Getenv("XDG_CONFIG_HOME")
+	if configDir == "" {
+		home, _ := os.UserHomeDir()
+		configDir = filepath.Join(home, ".config")
+	}
+	xdgConfig := filepath.Join(configDir, "nunchux", "config")
+	if _, err := os.Stat(xdgConfig); err == nil {
+		return ConfigResult{Path: xdgConfig, IsLocal: false}, nil
+	}
+
+	return ConfigResult{}, nil // No config found
+}
+
+// FindHomeConfigFile searches only in trusted home locations (skips upward search)
+func FindHomeConfigFile() (string, error) {
 	// 1. Environment variable
 	if envFile := os.Getenv("NUNCHUX_RC_FILE"); envFile != "" {
 		if _, err := os.Stat(envFile); err == nil {
@@ -363,18 +404,7 @@ func FindConfigFile() (string, error) {
 		}
 	}
 
-	// 2. Search upward for .nunchuxrc
-	cwd, err := os.Getwd()
-	if err == nil {
-		for dir := cwd; dir != "/" && dir != "."; dir = filepath.Dir(dir) {
-			rc := filepath.Join(dir, ".nunchuxrc")
-			if _, err := os.Stat(rc); err == nil {
-				return rc, nil
-			}
-		}
-	}
-
-	// 3. XDG config
+	// 2. XDG config
 	configDir := os.Getenv("XDG_CONFIG_HOME")
 	if configDir == "" {
 		home, _ := os.UserHomeDir()
@@ -385,5 +415,5 @@ func FindConfigFile() (string, error) {
 		return xdgConfig, nil
 	}
 
-	return "", nil // No config found
+	return "", nil
 }

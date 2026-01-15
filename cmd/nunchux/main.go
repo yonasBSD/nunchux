@@ -118,9 +118,9 @@ func main() {
 	logInfo("nunchux started")
 
 	if *debugFlag && flag.NArg() == 0 {
-		cfgPath, _ := config.FindConfigFile()
+		cfgResult, _ := config.FindConfigFile()
 		binDir := getBinDir()
-		fmt.Printf("Config: %s\n", cfgPath)
+		fmt.Printf("Config: %s\n", cfgResult.Path)
 		fmt.Printf("BinDir: %s\n", binDir)
 		fmt.Printf("nunchux-run exists: %v\n", fileExists(filepath.Join(binDir, "nunchux-run")))
 		return
@@ -139,12 +139,39 @@ func main() {
 	}
 
 	// Find and load config
-	cfgPath, err := config.FindConfigFile()
+	cfgResult, err := config.FindConfigFile()
 	if err != nil {
 		logError("Config search failed: %v", err)
 		ui.ShowError(fmt.Errorf("error finding config: %w", err))
 		os.Exit(1)
 	}
+
+	cfgPath := cfgResult.Path
+
+	// If config is from a local directory (not home), verify trust
+	if cfgResult.IsLocal && cfgPath != "" {
+		logDebug("Found local config at %s, checking trust", cfgPath)
+		if !config.IsConfigTrusted(cfgPath) {
+			logDebug("Config not trusted, prompting user")
+			if promptTrustConfig(cfgPath) {
+				logDebug("User accepted trust")
+				fmt.Fprintln(os.Stderr, "[DEBUG] Trust accepted, continuing...") // Visible trace
+				// User accepted, add to trusted list
+				if err := config.TrustConfig(cfgPath); err != nil {
+					logError("Failed to save trust: %v", err)
+				}
+			} else {
+				// User rejected, fall back to home config
+				logInfo("Local config rejected, falling back to home config")
+				cfgPath, _ = config.FindHomeConfigFile()
+			}
+		} else {
+			logDebug("Config already trusted")
+		}
+	}
+
+	fmt.Fprintln(os.Stderr, "[DEBUG] About to load config:", cfgPath) // Visible trace
+
 	if cfgPath == "" {
 		// No config file - relaunch in a popup with border for onboarding
 		// Use run-shell -b with sleep to let current popup close first
@@ -159,9 +186,11 @@ func main() {
 	cfg, err := config.Load(cfgPath)
 	if err != nil {
 		logError("Config load failed: %v", err)
+		fmt.Fprintln(os.Stderr, "[DEBUG] Config load error:", err) // Visible trace
 		ui.ShowError(fmt.Errorf("error loading config: %w", err))
 		os.Exit(1)
 	}
+	fmt.Fprintln(os.Stderr, "[DEBUG] Config loaded successfully") // Visible trace
 
 	// Override ShowHelp based on CLI flags
 	if *showShortcutsFlag {
@@ -233,6 +262,7 @@ func main() {
 	}
 
 	// Run main menu loop
+	fmt.Fprintln(os.Stderr, "[DEBUG] About to run menu") // Visible trace
 	runMenu(registry, tmuxClient, *submenuFlag)
 }
 
@@ -663,9 +693,39 @@ func runInitWizard() {
 	os.Exit(0)
 }
 
+// promptTrustConfig asks the user if they trust a local config file
+// Uses fzf for the prompt so it works in tmux popup context
+func promptTrustConfig(cfgPath string) bool {
+	// Build fzf command for yes/no prompt
+	header := fmt.Sprintf("Found local config: %s\nTrust this config?", cfgPath)
+	args := []string{
+		"--height=100%",
+		"--layout=reverse",
+		"--header=" + header,
+		"--header-first",
+		"--no-info",
+		"--pointer=>",
+		"--color=header:yellow",
+		"--border=rounded",
+		"--border-label= Trust Config? ",
+	}
+
+	cmd := exec.Command("fzf", args...)
+	cmd.Stdin = strings.NewReader("No\nYes")
+	cmd.Stderr = os.Stderr
+
+	output, err := cmd.Output()
+	if err != nil {
+		return false // Canceled or error = don't trust
+	}
+
+	return strings.TrimSpace(string(output)) == "Yes"
+}
+
 // handleEditConfig opens the config file in the user's editor
 func handleEditConfig(registry *items.Registry, tmuxClient *tmux.Client) {
-	cfgPath, _ := config.FindConfigFile()
+	cfgResult, _ := config.FindConfigFile()
+	cfgPath := cfgResult.Path
 	if cfgPath == "" {
 		cfgPath = onboarding.GetDefaultConfigPath()
 	}
