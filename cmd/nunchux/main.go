@@ -151,17 +151,29 @@ func main() {
 	// If config is from a local directory (not home), verify trust
 	if cfgResult.IsLocal && cfgPath != "" {
 		logDebug("Found local config at %s, checking trust", cfgPath)
-		if !config.IsConfigTrusted(cfgPath) {
+
+		// Check if blocked first
+		if config.IsConfigBlocked(cfgPath) {
+			logDebug("Config is blocked, skipping")
+			cfgPath, _ = config.FindHomeConfigFile()
+		} else if !config.IsConfigTrusted(cfgPath) {
 			logDebug("Config not trusted, prompting user")
-			if promptTrustConfig(cfgPath) {
-				logDebug("User accepted trust")
-				fmt.Fprintln(os.Stderr, "[DEBUG] Trust accepted, continuing...") // Visible trace
-				// User accepted, add to trusted list
+			switch promptTrustConfig(cfgPath) {
+			case trustOnce:
+				logDebug("User accepted trust for this session")
+				// Load the config but don't save to trusted list
+			case trustAlways:
+				logDebug("User accepted trust permanently")
 				if err := config.TrustConfig(cfgPath); err != nil {
 					logError("Failed to save trust: %v", err)
 				}
-			} else {
-				// User rejected, fall back to home config
+			case trustNever:
+				logInfo("Local config permanently blocked")
+				if err := config.BlockConfig(cfgPath); err != nil {
+					logError("Failed to save block: %v", err)
+				}
+				cfgPath, _ = config.FindHomeConfigFile()
+			default: // trustNo
 				logInfo("Local config rejected, falling back to home config")
 				cfgPath, _ = config.FindHomeConfigFile()
 			}
@@ -169,8 +181,6 @@ func main() {
 			logDebug("Config already trusted")
 		}
 	}
-
-	fmt.Fprintln(os.Stderr, "[DEBUG] About to load config:", cfgPath) // Visible trace
 
 	if cfgPath == "" {
 		// No config file - relaunch in a popup with border for onboarding
@@ -186,11 +196,9 @@ func main() {
 	cfg, err := config.Load(cfgPath)
 	if err != nil {
 		logError("Config load failed: %v", err)
-		fmt.Fprintln(os.Stderr, "[DEBUG] Config load error:", err) // Visible trace
 		ui.ShowError(fmt.Errorf("error loading config: %w", err))
 		os.Exit(1)
 	}
-	fmt.Fprintln(os.Stderr, "[DEBUG] Config loaded successfully") // Visible trace
 
 	// Override ShowHelp based on CLI flags
 	if *showShortcutsFlag {
@@ -262,7 +270,6 @@ func main() {
 	}
 
 	// Run main menu loop
-	fmt.Fprintln(os.Stderr, "[DEBUG] About to run menu") // Visible trace
 	runMenu(registry, tmuxClient, *submenuFlag)
 }
 
@@ -693,9 +700,19 @@ func runInitWizard() {
 	os.Exit(0)
 }
 
+// Trust response types
+type trustResponse int
+
+const (
+	trustNo trustResponse = iota
+	trustOnce
+	trustAlways
+	trustNever
+)
+
 // promptTrustConfig asks the user if they trust a local config file
 // Uses fzf for the prompt so it works in tmux popup context
-func promptTrustConfig(cfgPath string) bool {
+func promptTrustConfig(cfgPath string) trustResponse {
 	// Build fzf command for yes/no prompt
 	header := fmt.Sprintf("Found local config: %s\nTrust this config?", cfgPath)
 	args := []string{
@@ -711,15 +728,24 @@ func promptTrustConfig(cfgPath string) bool {
 	}
 
 	cmd := exec.Command("fzf", args...)
-	cmd.Stdin = strings.NewReader("No\nYes")
+	cmd.Stdin = strings.NewReader("No\nYes, once\nYes, always\nNo, never")
 	cmd.Stderr = os.Stderr
 
 	output, err := cmd.Output()
 	if err != nil {
-		return false // Canceled or error = don't trust
+		return trustNo // Canceled or error = don't trust
 	}
 
-	return strings.TrimSpace(string(output)) == "Yes"
+	switch strings.TrimSpace(string(output)) {
+	case "Yes, once":
+		return trustOnce
+	case "Yes, always":
+		return trustAlways
+	case "No, never":
+		return trustNever
+	default:
+		return trustNo
+	}
 }
 
 // handleEditConfig opens the config file in the user's editor

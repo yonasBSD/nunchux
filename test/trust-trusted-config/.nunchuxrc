@@ -1,0 +1,6 @@
+# Test: Trusted config should load
+# This local config should load because it's trusted
+
+[app:trusted-app]
+cmd = echo "This should appear"
+desc = Trusted app test

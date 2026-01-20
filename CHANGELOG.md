@@ -10,6 +10,19 @@ This release is a complete rewrite of nunchux from Bash to Go, delivering signif
 
 **~5x faster startup** - Benchmarked at 23ms vs 117ms for the Bash version. The menu now appears nearly instantly.
 
+### Security
+
+**Trusted configs** - Local `.nunchuxrc` files found in project directories now require explicit trust before loading. This protects against malicious configs in cloned repositories.
+
+When nunchux finds a local config, you'll see a prompt:
+
+- **No** - Skip, use home config (ask again next time)
+- **Yes, once** - Load this time only (ask again next time)
+- **Yes, always** - Trust permanently
+- **No, never** - Block permanently
+
+Trusted and blocked paths are stored in `~/.local/state/nunchux/`. See [docs/trusted_configs.md](docs/trusted_configs.md) for details.
+
 ### Upgrading
 
 ```

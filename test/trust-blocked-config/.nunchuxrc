@@ -1,0 +1,6 @@
+# Test: Blocked config should be skipped
+# This local config should NOT load because it's blocked
+
+[app:blocked-app]
+cmd = echo "This should not appear"
+desc = Blocked app test
