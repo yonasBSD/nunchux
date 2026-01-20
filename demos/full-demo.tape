@@ -60,8 +60,6 @@ Sleep 500ms
 Ctrl+T
 Sleep 1.5s
 
-Type "git"
-
 # Shortcuts are now visible (ctrl-g, ctrl-c, ctrl-n)
 Sleep 1s
 
