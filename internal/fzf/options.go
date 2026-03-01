@@ -73,11 +73,11 @@ func (b *OptionsBuilder) Build() []string {
 		"--no-preview",
 	}
 
-	// Prompt
+	// Prompt (add padding to indent the query field)
 	if b.settings.FzfPrompt != "" {
 		opts = append(opts, "--prompt="+b.settings.FzfPrompt)
 	} else {
-		opts = append(opts, "--prompt= ")
+		opts = append(opts, "--prompt=  ")
 	}
 
 	// Pointer
