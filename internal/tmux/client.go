@@ -76,6 +76,48 @@ func (c *Client) ListWindowsInfo() ([]WindowInfo, error) {
 	return windows, nil
 }
 
+// SessionInfo contains information about a tmux session
+type SessionInfo struct {
+	Name     string
+	Attached bool
+	Current  bool
+}
+
+// ListSessionsInfo returns list of sessions with attached state
+func (c *Client) ListSessionsInfo() ([]SessionInfo, error) {
+	// Get current session name
+	currentSession, _ := exec.Command("tmux", "display-message", "-p", "#{session_name}").Output()
+	currentName := strings.TrimSpace(string(currentSession))
+
+	output, err := exec.Command("tmux", "list-sessions", "-F", "#{session_name}\t#{session_attached}").Output()
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+	if len(lines) == 1 && lines[0] == "" {
+		return nil, nil
+	}
+
+	var sessions []SessionInfo
+	for _, line := range lines {
+		parts := strings.Split(line, "\t")
+		if len(parts) < 2 {
+			continue
+		}
+		sessions = append(sessions, SessionInfo{
+			Name:     parts[0],
+			Attached: parts[1] != "0",
+			Current:  parts[0] == currentName,
+		})
+	}
+	return sessions, nil
+}
+
+// SwitchSession switches to a different tmux session
+func (c *Client) SwitchSession(name string) error {
+	return exec.Command("tmux", "switch-client", "-t", name).Run()
+}
+
 // RunningWindows returns a map of running window names for efficient lookup
 func (c *Client) RunningWindows() map[string]bool {
 	windows, err := c.ListWindows()

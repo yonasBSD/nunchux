@@ -617,6 +617,13 @@ func runMenu(registry *items.Registry, tmuxClient *tmux.Client, currentMenu stri
 			return
 		}
 
+		// Check for session selection (from > prefix mode)
+		if strings.HasPrefix(sel.Name, "session:") {
+			sessionName := strings.TrimPrefix(sel.Name, "session:")
+			tmuxClient.SwitchSession(sessionName)
+			return
+		}
+
 		// Handle special empty-config menu items
 		if sel.Name == "__edit_config" {
 			handleEditConfig(registry, tmuxClient)

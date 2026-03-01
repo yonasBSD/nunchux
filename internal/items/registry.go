@@ -345,22 +345,38 @@ func (r *Registry) FindTaskrunnerItem(name string) *TaskrunnerItem {
 
 // BuildWindowsMenu builds the menu content for window switching mode (> prefix)
 func (r *Registry) BuildWindowsMenu(tmuxClient *tmux.Client) string {
+	var lines []string
+
+	// Add windows from current session
 	windows, err := tmuxClient.ListWindowsInfo()
-	if err != nil || len(windows) == 0 {
-		return ""
+	if err == nil {
+		for _, w := range windows {
+			icon := r.Settings.IconStopped
+			if w.Active {
+				icon = r.Settings.IconRunning
+			}
+			// Format: display\tshortcut\tname (matches menu format)
+			// The name field uses window:N format for selection handling
+			// Prefix with > so query ">nvim" matches windows containing "nvim"
+			display := fmt.Sprintf("> %s %s", icon, w.Name)
+			lines = append(lines, fmt.Sprintf("%s\t\twindow:%d", display, w.Index))
+		}
 	}
 
-	var lines []string
-	for _, w := range windows {
-		icon := r.Settings.IconStopped
-		if w.Active {
-			icon = r.Settings.IconRunning
+	// Add sessions
+	sessions, err := tmuxClient.ListSessionsInfo()
+	if err == nil {
+		for _, s := range sessions {
+			// Use □ for sessions to distinguish from windows (●/○)
+			// ■ = current/attached, □ = detached
+			icon := "□"
+			if s.Current || s.Attached {
+				icon = "■"
+			}
+			display := fmt.Sprintf("> %s %s", icon, s.Name)
+			lines = append(lines, fmt.Sprintf("%s\t\tsession:%s", display, s.Name))
 		}
-		// Format: display\tshortcut\tname (matches menu format)
-		// The name field uses window:N format for selection handling
-		// Prefix with > so query ">nvim" matches windows containing "nvim"
-		display := fmt.Sprintf("> %s %s", icon, w.Name)
-		lines = append(lines, fmt.Sprintf("%s\t\twindow:%d", display, w.Index))
 	}
+
 	return strings.Join(lines, "\n")
 }
