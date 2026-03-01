@@ -154,3 +154,21 @@ func BuildForActionMenu(settings *config.Settings, itemName string) []string {
 		"--expect=enter,esc",
 	}
 }
+
+// BuildForWindowSwitcher returns options for the window switcher menu
+func BuildForWindowSwitcher(settings *config.Settings) []string {
+	return []string{
+		"--ansi",
+		"--delimiter=\t",
+		"--with-nth=1",
+		"--height=100%",
+		"--layout=reverse",
+		"--border=rounded",
+		"--border-label= Windows ",
+		"--border-label-pos=3",
+		"--no-info",
+		"--pointer=" + settings.FzfPointer,
+		"--color=" + settings.FzfColors,
+		"--expect=enter,esc",
+	}
+}

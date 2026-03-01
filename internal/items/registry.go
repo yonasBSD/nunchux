@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"nunchux/internal/config"
+	"nunchux/internal/tmux"
 )
 
 // menuResult holds formatted item data for sorting
@@ -340,4 +341,26 @@ func (r *Registry) FindTaskrunnerItem(name string) *TaskrunnerItem {
 		}
 	}
 	return nil
+}
+
+// BuildWindowsMenu builds the menu content for window switching mode (> prefix)
+func (r *Registry) BuildWindowsMenu(tmuxClient *tmux.Client) string {
+	windows, err := tmuxClient.ListWindowsInfo()
+	if err != nil || len(windows) == 0 {
+		return ""
+	}
+
+	var lines []string
+	for _, w := range windows {
+		icon := r.Settings.IconStopped
+		if w.Active {
+			icon = r.Settings.IconRunning
+		}
+		// Format: display\tshortcut\tname (matches menu format)
+		// The name field uses window:N format for selection handling
+		// Prefix with > so query ">nvim" matches windows containing "nvim"
+		display := fmt.Sprintf("> %s %s", icon, w.Name)
+		lines = append(lines, fmt.Sprintf("%s\t\twindow:%d", display, w.Index))
+	}
+	return strings.Join(lines, "\n")
 }

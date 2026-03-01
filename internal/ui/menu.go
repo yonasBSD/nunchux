@@ -152,6 +152,18 @@ func buildFzfOptions(settings *config.Settings, currentMenu string, shortcuts ma
 	killReloadCmd := fmt.Sprintf("reload(%s --kill {3} 2>/dev/null; %s)", exe, reloadCmd)
 	builder.Bind("ctrl-x", killReloadCmd)
 
+	// Add change binding to reload menu based on query prefix (for > window switching)
+	// When query starts with >, show windows. Windows items are prefixed with > so filtering works.
+	reloadBase := fmt.Sprintf("%s --menu --query {q}", exe)
+	if currentMenu != "" {
+		reloadBase += " --submenu " + currentMenu
+	}
+	if settings.ShowHelp {
+		reloadBase += " --show-shortcuts"
+	}
+	changeCmd := fmt.Sprintf("reload(%s)", reloadBase)
+	builder.Bind("change", changeCmd)
+
 	return builder.Build()
 }
 

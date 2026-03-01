@@ -1,6 +1,7 @@
 package tmux
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -38,6 +39,41 @@ func (c *Client) ListWindows() ([]string, error) {
 		return nil, nil
 	}
 	return lines, nil
+}
+
+// WindowInfo contains information about a tmux window
+type WindowInfo struct {
+	Index  int
+	Name   string
+	Active bool
+}
+
+// ListWindowsInfo returns list of windows with index and active state
+func (c *Client) ListWindowsInfo() ([]WindowInfo, error) {
+	output, err := exec.Command("tmux", "list-windows", "-F", "#{window_index}\t#{window_name}\t#{window_active}").Output()
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+	if len(lines) == 1 && lines[0] == "" {
+		return nil, nil
+	}
+
+	var windows []WindowInfo
+	for _, line := range lines {
+		parts := strings.Split(line, "\t")
+		if len(parts) < 3 {
+			continue
+		}
+		var index int
+		fmt.Sscanf(parts[0], "%d", &index)
+		windows = append(windows, WindowInfo{
+			Index:  index,
+			Name:   parts[1],
+			Active: parts[2] == "1",
+		})
+	}
+	return windows, nil
 }
 
 // RunningWindows returns a map of running window names for efficient lookup

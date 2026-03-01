@@ -88,6 +88,7 @@ func main() {
 	menuFlag := flag.Bool("menu", false, "Output menu content (for fzf reload)")
 	shellInitFlag := flag.String("shell-init", "", "Output shell init code (bash/zsh/fish)")
 	initFlag := flag.Bool("init", false, "Run first-time setup wizard (internal)")
+	queryFlag := flag.String("query", "", "Current fzf query (for mode switching)")
 	flag.Parse()
 
 	if *logFlag {
@@ -257,8 +258,14 @@ func main() {
 
 	// Handle menu output (for fzf reload)
 	if *menuFlag {
-		runningWindows := tmuxClient.RunningWindows()
-		content := registry.BuildMenu(ctx, runningWindows, *submenuFlag)
+		var content string
+		if strings.HasPrefix(*queryFlag, ">") {
+			// Windows mode - show tmux windows instead of apps
+			content = registry.BuildWindowsMenu(tmuxClient)
+		} else {
+			runningWindows := tmuxClient.RunningWindows()
+			content = registry.BuildMenu(ctx, runningWindows, *submenuFlag)
+		}
 		fmt.Print(content)
 		return
 	}
@@ -600,6 +607,14 @@ func runMenu(registry *items.Registry, tmuxClient *tmux.Client, currentMenu stri
 		// Skip divider lines (empty name field)
 		if sel.Name == "" {
 			continue
+		}
+
+		// Check for window selection (from > prefix mode)
+		if strings.HasPrefix(sel.Name, "window:") {
+			var index int
+			fmt.Sscanf(sel.Name, "window:%d", &index)
+			tmuxClient.SelectWindow(fmt.Sprintf(":%d", index))
+			return
 		}
 
 		// Handle special empty-config menu items
