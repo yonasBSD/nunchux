@@ -259,7 +259,7 @@ func main() {
 	// Handle menu output (for fzf reload)
 	if *menuFlag {
 		var content string
-		if strings.HasPrefix(*queryFlag, ">") {
+		if strings.HasPrefix(*queryFlag, cfg.Settings.Switcher.Prefix) {
 			// Windows mode - show tmux windows instead of apps
 			content = registry.BuildWindowsMenu(tmuxClient)
 		} else {

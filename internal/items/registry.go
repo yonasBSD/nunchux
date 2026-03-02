@@ -343,9 +343,10 @@ func (r *Registry) FindTaskrunnerItem(name string) *TaskrunnerItem {
 	return nil
 }
 
-// BuildWindowsMenu builds the menu content for window switching mode (> prefix)
+// BuildWindowsMenu builds the menu content for window switching mode (prefix mode)
 func (r *Registry) BuildWindowsMenu(tmuxClient *tmux.Client) string {
 	var lines []string
+	prefix := r.Settings.Switcher.Prefix
 
 	// Add windows from current session
 	windows, err := tmuxClient.ListWindowsInfo()
@@ -357,8 +358,8 @@ func (r *Registry) BuildWindowsMenu(tmuxClient *tmux.Client) string {
 			}
 			// Format: display\tshortcut\tname (matches menu format)
 			// The name field uses window:N format for selection handling
-			// Prefix with > so query ">nvim" matches windows containing "nvim"
-			display := fmt.Sprintf("> %s %s", icon, w.Name)
+			// Prefix with switcher prefix so query filtering works
+			display := fmt.Sprintf("%s %s %s", prefix, icon, w.Name)
 			lines = append(lines, fmt.Sprintf("%s\t\twindow:%d", display, w.Index))
 		}
 	}
@@ -373,7 +374,7 @@ func (r *Registry) BuildWindowsMenu(tmuxClient *tmux.Client) string {
 			if s.Current || s.Attached {
 				icon = "■"
 			}
-			display := fmt.Sprintf("> %s %s", icon, s.Name)
+			display := fmt.Sprintf("%s %s %s", prefix, icon, s.Name)
 			lines = append(lines, fmt.Sprintf("%s\t\tsession:%s", display, s.Name))
 		}
 	}

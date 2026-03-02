@@ -222,6 +222,23 @@ Common shortcut keys: `ctrl-a` through `ctrl-z`, `alt-a` through `alt-z`, `f1` t
 
 Note: `shift-enter` and `ctrl-enter` are **not supported** by most terminals.
 
+## Window Switcher
+
+Type `>` in the menu to switch to tmux window/session mode. Configure with `[switcher]`:
+
+```ini
+[switcher]
+preview = true   # Show preview of window content (default: true)
+prefix = >       # Character to activate switcher (default: >)
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `preview` | `true` | Show live preview of window content below the list |
+| `prefix` | `>` | Character prefix that activates window switching mode |
+
+When preview is enabled, you'll see the bottom portion of each window's content as you navigate.
+
 ## Ordering
 
 Use `[order]` sections to control item order declaratively:

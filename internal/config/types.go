@@ -23,6 +23,12 @@ type Config struct {
 	Order       OrderConfig
 }
 
+// SwitcherSettings holds settings for tmux window/session switcher
+type SwitcherSettings struct {
+	Preview bool   // Show preview of tmux windows/sessions
+	Prefix  string // Character prefix to activate switcher mode
+}
+
 // Settings holds global configuration
 type Settings struct {
 	// Icons
@@ -82,6 +88,9 @@ type Settings struct {
 	TaskrunnerIconRunning string
 	TaskrunnerIconSuccess string
 	TaskrunnerIconFailed  string
+
+	// Switcher settings
+	Switcher SwitcherSettings
 }
 
 // App represents a configured application

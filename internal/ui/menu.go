@@ -152,8 +152,8 @@ func buildFzfOptions(settings *config.Settings, currentMenu string, shortcuts ma
 	killReloadCmd := fmt.Sprintf("reload(%s --kill {3} 2>/dev/null; %s)", exe, reloadCmd)
 	builder.Bind("ctrl-x", killReloadCmd)
 
-	// Add change binding to reload menu based on query prefix (for > window switching)
-	// When query starts with >, show windows. Windows items are prefixed with > so filtering works.
+	// Add change binding to reload menu based on query prefix (for window switching)
+	// When query starts with prefix, show windows. Windows items are prefixed with the same prefix so filtering works.
 	reloadBase := fmt.Sprintf("%s --menu --query {q}", exe)
 	if currentMenu != "" {
 		reloadBase += " --submenu " + currentMenu
@@ -161,8 +161,19 @@ func buildFzfOptions(settings *config.Settings, currentMenu string, shortcuts ma
 	if settings.ShowHelp {
 		reloadBase += " --show-shortcuts"
 	}
-	changeCmd := fmt.Sprintf("reload(%s)", reloadBase)
-	builder.Bind("change", changeCmd)
+
+	// Only add preview if switcher preview is enabled
+	if settings.Switcher.Preview {
+		builder.Preview(fzf.PreviewWindowsMode())
+		builder.Bind("start", "hide-preview")
+		// Show preview when query starts with prefix, hide otherwise
+		showHidePreview := fmt.Sprintf(`transform(if [[ {q} == "%s"* ]]; then echo show-preview; else echo hide-preview; fi)`, settings.Switcher.Prefix)
+		changeCmd := fmt.Sprintf("reload(%s)+%s", reloadBase, showHidePreview)
+		builder.Bind("change", changeCmd)
+	} else {
+		changeCmd := fmt.Sprintf("reload(%s)", reloadBase)
+		builder.Bind("change", changeCmd)
+	}
 
 	return builder.Build()
 }

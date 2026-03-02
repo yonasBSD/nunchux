@@ -92,6 +92,8 @@ func Load(path string) (*Config, error) {
 			} else if currentSection == "taskrunner" {
 				// Global taskrunner settings (no name)
 				applyTaskrunnerGlobalSettings(&cfg.Settings, key, value)
+			} else if currentSection == "switcher" {
+				applySwitcherSettings(&cfg.Settings, key, value)
 			} else {
 				sectionData[key] = value
 			}
@@ -329,6 +331,15 @@ func applyTaskrunnerGlobalSettings(s *Settings, key, value string) {
 		s.TaskrunnerIconSuccess = value
 	case "icon_failed":
 		s.TaskrunnerIconFailed = value
+	}
+}
+
+func applySwitcherSettings(s *Settings, key, value string) {
+	switch key {
+	case "preview":
+		s.Switcher.Preview = value == "true"
+	case "prefix":
+		s.Switcher.Prefix = value
 	}
 }
 

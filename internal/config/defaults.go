@@ -57,6 +57,12 @@ func DefaultSettings() Settings {
 		TaskrunnerIconRunning: "🔄",
 		TaskrunnerIconSuccess: "✅",
 		TaskrunnerIconFailed:  "❌",
+
+		// Switcher settings
+		Switcher: SwitcherSettings{
+			Preview: true,
+			Prefix:  ">",
+		},
 	}
 }
 

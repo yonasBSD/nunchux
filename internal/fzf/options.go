@@ -9,11 +9,12 @@ import (
 
 // OptionsBuilder constructs fzf command line options
 type OptionsBuilder struct {
-	settings     *config.Settings
-	borderLabel  string
-	header       string
-	expectKeys   []string
-	bindCommands []string
+	settings       *config.Settings
+	borderLabel    string
+	header         string
+	expectKeys     []string
+	bindCommands   []string
+	previewCommand string
 }
 
 // NewOptionsBuilder creates a new fzf options builder
@@ -60,6 +61,17 @@ func (b *OptionsBuilder) Bind(key, action string) *OptionsBuilder {
 	return b
 }
 
+// Preview sets a preview command
+func (b *OptionsBuilder) Preview(command string) *OptionsBuilder {
+	b.previewCommand = command
+	return b
+}
+
+// PreviewWindowsMode returns the preview command for tmux windows/sessions
+func PreviewWindowsMode() string {
+	return `bash -c 'name={3}; if [[ "$name" == window:* ]]; then idx="${name#window:}"; tmux capture-pane -t ":$idx" -p 2>/dev/null; elif [[ "$name" == session:* ]]; then sess="${name#session:}"; tmux capture-pane -t "$sess:" -p 2>/dev/null; fi'`
+}
+
 // Build returns the complete fzf options slice
 func (b *OptionsBuilder) Build() []string {
 	opts := []string{
@@ -70,7 +82,14 @@ func (b *OptionsBuilder) Build() []string {
 		"--layout=reverse",
 		"--height=100%",
 		"--highlight-line",
-		"--no-preview",
+	}
+
+	// Preview
+	if b.previewCommand != "" {
+		opts = append(opts, "--preview="+b.previewCommand)
+		opts = append(opts, "--preview-window=down,50%,border-top,follow")
+	} else {
+		opts = append(opts, "--no-preview")
 	}
 
 	// Prompt (add padding to indent the query field)

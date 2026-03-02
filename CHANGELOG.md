@@ -2,6 +2,32 @@
 
 All notable changes to nunchux will be documented in this file.
 
+## [3.1.1]
+
+### Switcher Configuration
+
+New `[switcher]` config section to customize window/session switching:
+
+```ini
+[switcher]
+preview = true   # Show live preview of window content (default: true)
+prefix = >       # Character to activate switcher mode (default: >)
+```
+
+* `preview` - Enable/disable the window content preview panel
+* `prefix` - Change the character that activates switcher mode (e.g., `@` instead of `>`)
+
+## [3.1.0]
+
+Window/Session Switcher: Type > in the main menu to switch to tmux windows and sessions
+
+* Windows show with ●/○ icons (active/inactive)
+* Sessions show with ■/□ icons (attached/detached)
+* Filter by typing after > (e.g., >nvim)
+* Backspace to return to normal menu
+
+UI Improvement: Added padding to the filter field for better alignment
+
 ## [3.0.0] - Complete Rewrite in Go
 
 This release is a complete rewrite of nunchux from Bash to Go, delivering significant performance improvements while maintaining full feature compatibility.
@@ -16,10 +42,10 @@ This release is a complete rewrite of nunchux from Bash to Go, delivering signif
 
 When nunchux finds a local config, you'll see a prompt:
 
-- **No** - Skip, use home config (ask again next time)
-- **Yes, once** - Load this time only (ask again next time)
-- **Yes, always** - Trust permanently
-- **No, never** - Block permanently
+* **No** - Skip, use home config (ask again next time)
+* **Yes, once** - Load this time only (ask again next time)
+* **Yes, always** - Trust permanently
+* **No, never** - Block permanently
 
 Trusted and blocked paths are stored in `~/.local/state/nunchux/`. See [docs/trusted_configs.md](docs/trusted_configs.md) for details.
 
@@ -37,7 +63,7 @@ TPM will download the new Go binary automatically. Your existing config works un
 
 ### New Features
 
-- **Configurable shortcut toggle key** - The key to toggle shortcut visibility is now configurable via `toggle_shortcuts_key` setting. Default remains `ctrl-/`.
+* **Configurable shortcut toggle key** - The key to toggle shortcut visibility is now configurable via `toggle_shortcuts_key` setting. Default remains `ctrl-/`.
 
 ```ini
 [settings]
@@ -48,36 +74,36 @@ toggle_shortcuts_key = ctrl-t
 
 ### Bug Fixes
 
-- **Fixed dirbrowser file count mismatch** - The file count shown in the main menu now respects the same filters as the actual dirbrowser (depth, exclude patterns, glob). Previously, the main menu showed a count of all files while the browser showed filtered results.
+* **Fixed dirbrowser file count mismatch** - The file count shown in the main menu now respects the same filters as the actual dirbrowser (depth, exclude patterns, glob). Previously, the main menu showed a count of all files while the browser showed filtered results.
 
 ## [2.5.0]
 
 ### Bug Fixes
 
-- **Fixed action menu not working** - Variable scoping bug in `_nunchux_apply_env()` caused the selected item name to be lost when using ctrl-j action menu or other shortcuts. The `while read` loop was overwriting the outer `$name` variable.
-- **Fixed empty selection crash** - Added guards against empty item names in launch functions, preventing "bad array subscript" errors.
-- **Fixed duplicate taskrunner loading** - Taskrunners were being loaded twice in some scenarios.
+* **Fixed action menu not working** - Variable scoping bug in `_nunchux_apply_env()` caused the selected item name to be lost when using ctrl-j action menu or other shortcuts. The `while read` loop was overwriting the outer `$name` variable.
+* **Fixed empty selection crash** - Added guards against empty item names in launch functions, preventing "bad array subscript" errors.
+* **Fixed duplicate taskrunner loading** - Taskrunners were being loaded twice in some scenarios.
 
 ### Performance Improvements
 
 Additional lazy loading to reduce startup time:
 
-- `nunchux-run.sh` - Only loaded when launching items
-- `config_templates.sh` - Only loaded during onboarding
-- `migration.sh` - Only loaded when migration is needed
+* `nunchux-run.sh` - Only loaded when launching items
+* `config_templates.sh` - Only loaded during onboarding
+* `migration.sh` - Only loaded when migration is needed
 
 ### Improvements
 
-- **Better onboarding experience** - Improved first-run setup flow
-- **Centralized error screens** - Consistent error display across all error conditions
+* **Better onboarding experience** - Improved first-run setup flow
+* **Centralized error screens** - Consistent error display across all error conditions
 
 ### Test Suite
 
 New comprehensive test framework with 30+ test cases:
 
-- **Automated tests** - Menu output validation, config parsing, taskrunner detection
-- **Visual tests** - Action types (popup, window, panes), keybindings, overrides
-- **Semi-automated tests** - Pane position verification, background window behavior
+* **Automated tests** - Menu output validation, config parsing, taskrunner detection
+* **Visual tests** - Action types (popup, window, panes), keybindings, overrides
+* **Semi-automated tests** - Pane position verification, background window behavior
 
 Run tests with `./test/run_tests.sh` or interactively with `./test/run_tests.sh -i`.
 
@@ -169,13 +195,13 @@ Note: These keys are reserved and cannot be used as item shortcuts.
 
 Press `ctrl-j` to open an action selection menu for the currently highlighted item. Choose how to open it:
 
-- Open in popup
-- Open in window
-- Open in background window
-- Open in pane to the right
-- Open in pane to the left
-- Open in pane above
-- Open in pane below
+* Open in popup
+* Open in window
+* Open in background window
+* Open in pane to the right
+* Open in pane to the left
+* Open in pane above
+* Open in pane below
 
 This provides quick access to all launch modes without needing to configure dedicated shortcuts for each action.
 
@@ -199,9 +225,9 @@ Note: `ctrl-m` cannot be used as it's equivalent to Enter in terminals.
 
 ### Fixed menu sorting when no `[order]` section is defined
 
-- Items now sort alphabetically (apps, menus, dirbrowsers first, then taskrunners)
-- Taskrunner items stay grouped by runner instead of being interleaved by task name
-- Taskrunner dividers now appear directly before their items, not grouped at the top
+* Items now sort alphabetically (apps, menus, dirbrowsers first, then taskrunners)
+* Taskrunner items stay grouped by runner instead of being interleaved by task name
+* Taskrunner dividers now appear directly before their items, not grouped at the top
 
 ## [2.2.0]
 
@@ -224,9 +250,9 @@ shortcut = ctrl-c
 
 Press the shortcut key while the menu is open to launch the item immediately.
 
-- **Toggle visibility** - Press `Ctrl-/` to show/hide the shortcut column
-- **Validation** - Invalid, reserved, or duplicate shortcuts show an error screen at startup
-- **Reserved keys** - `enter`, `esc`, `ctrl-x`, `/`, and your configured primary/secondary keys cannot be used
+* **Toggle visibility** - Press `Ctrl-/` to show/hide the shortcut column
+* **Validation** - Invalid, reserved, or duplicate shortcuts show an error screen at startup
+* **Reserved keys** - `enter`, `esc`, `ctrl-x`, `/`, and your configured primary/secondary keys cannot be used
 
 Shortcuts are available on apps, submenus, and directory browsers. Taskrunner items cannot have shortcuts (they're discovered at runtime).
 
@@ -265,15 +291,15 @@ docker
 
 Items are displayed in the order listed. Unlisted items are appended alphabetically.
 
-- **Taskrunners in main order** - Use `taskrunner:name` format to position taskrunners anywhere in the menu
-- **Submenu ordering** - Use `[order:submenu_name]` to control item order within submenus
-- **Migration assistant** - Automatically converts old `order =` properties to new format with backup
+* **Taskrunners in main order** - Use `taskrunner:name` format to position taskrunners anywhere in the menu
+* **Submenu ordering** - Use `[order:submenu_name]` to control item order within submenus
+* **Migration assistant** - Automatically converts old `order =` properties to new format with backup
 
 When you launch nunchux with the old `order =` properties, an interactive migration prompt will convert your config automatically.
 
 ### Bug Fixes
 
-- Fixed helper commands (`ago`, `lines`, `nearest`) not working in status commands when environment inheritance was enabled
+* Fixed helper commands (`ago`, `lines`, `nearest`) not working in status commands when environment inheritance was enabled
 
 ## [2.1.0]
 
@@ -293,9 +319,9 @@ source ~/.tmux/plugins/nunchux/shell-init.bash  # or .zsh/.fish
 
 Control how items open with `primary_action` and `secondary_action`:
 
-- `popup` - Open in tmux popup
-- `window` - Open in window with focus
-- `background_window` - Open in window, stay in current pane
+* `popup` - Open in tmux popup
+* `window` - Open in window with focus
+* `background_window` - Open in window, stay in current pane
 
 Configure globally or per-item:
 
@@ -313,20 +339,20 @@ primary_action = background_window  # Run npm tasks in background
 
 Default actions by type:
 
-- Apps: popup / window
-- Taskrunners: window / background_window
-- Dirbrowsers: popup / window
+* Apps: popup / window
+* Taskrunners: window / background_window
+* Dirbrowsers: popup / window
 
 #### Task Runner Improvements
 
-- Tasks now run in dedicated windows with live status updates
-- Primary key (Enter): Run task and switch focus to its window
-- Secondary key (Ctrl-O): Run task in background, stay in current pane
-- Configurable status icons for running, success, and failed states
-- Kill running taskrunner windows with Ctrl-X
-- Window reuse - running the same task twice reuses the existing window
-- Better window titles showing task name and status
-- Tasks can now run in popups (configure `primary_action = popup`)
+* Tasks now run in dedicated windows with live status updates
+* Primary key (Enter): Run task and switch focus to its window
+* Secondary key (Ctrl-O): Run task in background, stay in current pane
+* Configurable status icons for running, success, and failed states
+* Kill running taskrunner windows with Ctrl-X
+* Window reuse - running the same task twice reuses the existing window
+* Better window titles showing task name and status
+* Tasks can now run in popups (configure `primary_action = popup`)
 
 ```ini
 [taskrunner]
@@ -337,8 +363,8 @@ icon_failed = ✗
 
 #### Configurable Keybindings
 
-- New `primary_key` and `secondary_key` settings (default: enter, ctrl-o)
-- Key validation with helpful error messages for unsupported keys
+* New `primary_key` and `secondary_key` settings (default: enter, ctrl-o)
+* Key validation with helpful error messages for unsupported keys
 
 ```ini
 [settings]
@@ -357,21 +383,21 @@ label = nunchux
 
 The label appears consistently across all UI elements:
 
-- Main menu border: `nunchux`
-- Submenus: `nunchux: system`
-- Apps: `nunchux: lazygit`
-- Submenu apps: `nunchux: system | btop`
-- Dirbrowsers: `nunchux: config`
-- Dirbrowser files: `nunchux: config | folder/file.txt`
+* Main menu border: `nunchux`
+* Submenus: `nunchux: system`
+* Apps: `nunchux: lazygit`
+* Submenu apps: `nunchux: system | btop`
+* Dirbrowsers: `nunchux: config`
+* Dirbrowser files: `nunchux: config | folder/file.txt`
 
 ### Improvements
 
-- Centralized launch logic in `nunchux-run` for consistent behavior
-- Consistent title formatting across all popups and menus
-- Border labels now left-aligned
-- Better fzf error handling
-- Vim modelines added to all source files
-- New integration tests for environment inheritance
+* Centralized launch logic in `nunchux-run` for consistent behavior
+* Consistent title formatting across all popups and menus
+* Border labels now left-aligned
+* Better fzf error handling
+* Vim modelines added to all source files
+* New integration tests for environment inheritance
 
 ## [2.0.0]
 
@@ -400,20 +426,20 @@ enabled = true
 
 When you launch nunchux with an old config, you'll see an interactive migration prompt:
 
-- Converts your config to the new format automatically
-- Lets you choose which task runners to enable
-- Saves a backup of your original config
+* Converts your config to the new format automatically
+* Lets you choose which task runners to enable
+* Saves a backup of your original config
 
 ### New Features
 
-- **Per-project configs** - Place `.nunchuxrc` in any directory, searches upward like `.gitignore`
-- **Ordering control** - ~~New `order` property on any item~~ (replaced by `[order]` sections in v2.3.0)
+* **Per-project configs** - Place `.nunchuxrc` in any directory, searches upward like `.gitignore`
+* **Ordering control** - ~~New `order` property on any item~~ (replaced by `[order]` sections in v2.3.0)
 
 ### Improvements
 
-- Modular codebase (lib/, modules/, taskrunners/)
-- Comprehensive test suite (BATS)
-- Improved caching and performance
+* Modular codebase (lib/, modules/, taskrunners/)
+* Comprehensive test suite (BATS)
+* Improved caching and performance
 
 ### Upgrading
 
@@ -431,51 +457,51 @@ The first official release of nunchux - a command palette for your tmux life.
 
 #### Apps & Popups
 
-- Launch TUI apps in tmux popups (Enter) or windows (Ctrl-O)
-- Automatic switch-to if app is already running - no duplicates
-- Kill running apps with Ctrl-X
-- Dynamic status info (git changes, docker containers, load, etc.)
+* Launch TUI apps in tmux popups (Enter) or windows (Ctrl-O)
+* Automatic switch-to if app is already running - no duplicates
+* Kill running apps with Ctrl-X
+* Dynamic status info (git changes, docker containers, load, etc.)
 
 #### Submenus
 
-- Organize apps into collapsible submenus
-- Each submenu can have its own status command
+* Organize apps into collapsible submenus
+* Each submenu can have its own status command
 
 #### Directory Browsers
 
-- Browse and open files from configured directories
-- Multiple sort modes: by modification time, grouped by folder, or alphabetical
-- Configurable depth, glob filters, and caching
+* Browse and open files from configured directories
+* Multiple sort modes: by modification time, grouped by folder, or alphabetical
+* Configurable depth, glob filters, and caching
 
 #### Task Runners
 
-- Built-in support for just, npm, and task (Taskfile)
-- Auto-detect project files and show available tasks
-- Tasks run in your current pane
+* Built-in support for just, npm, and task (Taskfile)
+* Auto-detect project files and show available tasks
+* Tasks run in your current pane
 
 #### Per-Project Configs
 
-- Place .nunchuxrc in any directory
-- Nunchux searches upward (like .gitignore)
-- Great for project-specific apps and tasks
+* Place .nunchuxrc in any directory
+* Nunchux searches upward (like .gitignore)
+* Great for project-specific apps and tasks
 
 #### Performance
 
-- Menu caching with instant display
-- Background refresh with fzf hot-swap
-- Feels snappy even with complex status commands
+* Menu caching with instant display
+* Background refresh with fzf hot-swap
+* Feels snappy even with complex status commands
 
 #### Helper Functions
 
-- `ago <file>` - relative modification time
-- `lines <file>` - line count
-- `nearest <file>` - find file by walking up directory tree
+* `ago <file>` - relative modification time
+* `lines <file>` - line count
+* `nearest <file>` - find file by walking up directory tree
 
 ### Requirements
 
-- tmux
-- fzf v0.45+
-- curl
+* tmux
+* fzf v0.45+
+* curl
 
 ### Install
 
