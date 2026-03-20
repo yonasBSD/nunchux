@@ -14,7 +14,7 @@ SHOW_SHORTCUTS="${SHOW_SHORTCUTS:-}"
 FZF_PROMPT="${FZF_PROMPT:-}"
 FZF_POINTER="${FZF_POINTER:-▌}"
 FZF_BORDER="${FZF_BORDER:-rounded}"
-FZF_COLORS="${FZF_COLORS:-fg+:white:bold,bg+:237,hl:214,hl+:214:bold,pointer:white,marker:green,header:gray,border:gray}"
+FZF_COLORS="${FZF_COLORS:-}"
 
 # Label used in borders and popup titles (can be overridden in config)
 NUNCHUX_LABEL="${NUNCHUX_LABEL:-nunchux}"
@@ -76,8 +76,8 @@ build_fzf_opts() {
     --highlight-line
     --no-preview
     --expect="$expect_keys"
-    --color="$FZF_COLORS"
   )
+  [[ -n "$FZF_COLORS" ]] && opts+=(--color="$FZF_COLORS")
 }
 
 # Map a pressed key to an action

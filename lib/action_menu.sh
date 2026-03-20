@@ -80,7 +80,7 @@ show_action_menu() {
     --no-info \
     --prompt="Action: " \
     --pointer="$FZF_POINTER" \
-    --color="$FZF_COLORS" \
+    ${FZF_COLORS:+--color="$FZF_COLORS"} \
     | cut -f1)
 
   if [[ -n "$selected" ]]; then

@@ -48,7 +48,7 @@ func DefaultSettings() Settings {
 		FzfPrompt:  "",
 		FzfPointer: "▌",
 		FzfBorder:  "rounded",
-		FzfColors:  "fg+:white:bold,bg+:237,hl:214,hl+:214:bold,pointer:white,marker:green,header:gray,border:gray",
+		FzfColors:  "",
 
 		// Exclude patterns for dirbrowser
 		ExcludePatterns: ".git, node_modules, Cache, cache, .cache, GPUCache, CachedData, blob_storage, Code Cache, Session Storage, Local Storage, IndexedDB, databases, *.db, *.db-*, *.sqlite*, *.log, *.png, *.jpg, *.jpeg, *.gif, *.ico, *.webp, *.woff*, *.ttf, *.lock, lock, *.pid",

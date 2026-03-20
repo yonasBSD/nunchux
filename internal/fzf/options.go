@@ -158,7 +158,7 @@ func (b *OptionsBuilder) Build() []string {
 
 // BuildForActionMenu returns options for the action selection menu
 func BuildForActionMenu(settings *config.Settings, itemName string) []string {
-	return []string{
+	opts := []string{
 		"--ansi",
 		"--delimiter=\t",
 		"--with-nth=2",
@@ -169,14 +169,17 @@ func BuildForActionMenu(settings *config.Settings, itemName string) []string {
 		"--border-label-pos=3",
 		"--no-info",
 		"--pointer=" + settings.FzfPointer,
-		"--color=" + settings.FzfColors,
 		"--expect=enter,esc",
 	}
+	if settings.FzfColors != "" {
+		opts = append(opts, "--color="+settings.FzfColors)
+	}
+	return opts
 }
 
 // BuildForWindowSwitcher returns options for the window switcher menu
 func BuildForWindowSwitcher(settings *config.Settings) []string {
-	return []string{
+	opts := []string{
 		"--ansi",
 		"--delimiter=\t",
 		"--with-nth=1",
@@ -187,7 +190,10 @@ func BuildForWindowSwitcher(settings *config.Settings) []string {
 		"--border-label-pos=3",
 		"--no-info",
 		"--pointer=" + settings.FzfPointer,
-		"--color=" + settings.FzfColors,
 		"--expect=enter,esc",
 	}
+	if settings.FzfColors != "" {
+		opts = append(opts, "--color="+settings.FzfColors)
+	}
+	return opts
 }

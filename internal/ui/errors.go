@@ -113,10 +113,12 @@ func ShowConfigErrors(settings *config.Settings, configPath string, errors []str
 		"--border=" + settings.FzfBorder,
 		"--border-label= " + settings.Label + ": config error ",
 		"--border-label-pos=3",
-		"--color=" + settings.FzfColors,
 		"--header=" + header,
 		"--header-first",
 		"--expect=enter,esc",
+	}
+	if settings.FzfColors != "" {
+		opts = append(opts, "--color="+settings.FzfColors)
 	}
 
 	sel, err := fzf.Run(strings.Join(lines, "\n"), opts)
