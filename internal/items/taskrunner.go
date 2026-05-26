@@ -89,7 +89,7 @@ func (t *TaskrunnerItem) GetSecondaryAction() config.Action {
 
 // WindowName returns the window name for tmux
 func (t *TaskrunnerItem) WindowName() string {
-	return t.Runner + " » " + t.Task.TaskName
+	return t.Task.TaskName
 }
 
 // TaskrunnerDivider represents a divider line in the menu

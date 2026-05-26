@@ -102,7 +102,7 @@ func (c *Client) launchWindow(opts LaunchOptions, background bool) error {
 
 	windowName := opts.Name
 	if opts.IsTaskrunner && opts.RunningIcon != "" {
-		windowName = opts.Name + " " + opts.RunningIcon
+		windowName = opts.RunningIcon + " " + opts.Name
 	}
 
 	args := []string{"new-window", "-n", windowName}
@@ -123,8 +123,8 @@ func (c *Client) launchWindow(opts LaunchOptions, background bool) error {
 }
 
 func (c *Client) respawnTaskrunnerWindow(opts LaunchOptions, background bool) error {
-	// Find existing window by name prefix (might have icon suffix)
-	windowID, err := c.findWindowByPrefix(opts.Name)
+	// Find existing window by name suffix (window has icon prefix)
+	windowID, err := c.findWindowBySuffix(opts.Name)
 	if err != nil || windowID == "" {
 		// No existing window, create new one
 		return c.launchWindow(LaunchOptions{
@@ -145,7 +145,7 @@ func (c *Client) respawnTaskrunnerWindow(opts LaunchOptions, background bool) er
 
 	windowName := opts.Name
 	if opts.RunningIcon != "" {
-		windowName = opts.Name + " " + opts.RunningIcon
+		windowName = opts.RunningIcon + " " + opts.Name
 	}
 
 	// Rename and respawn existing window
@@ -165,7 +165,7 @@ func (c *Client) respawnTaskrunnerWindow(opts LaunchOptions, background bool) er
 	return nil
 }
 
-func (c *Client) findWindowByPrefix(prefix string) (string, error) {
+func (c *Client) findWindowBySuffix(suffix string) (string, error) {
 	output, err := exec.Command("tmux", "list-windows", "-F", "#{window_id} #{window_name}").Output()
 	if err != nil {
 		return "", err
@@ -179,7 +179,7 @@ func (c *Client) findWindowByPrefix(prefix string) (string, error) {
 		}
 		windowID := parts[0]
 		windowName := parts[1]
-		if strings.HasPrefix(windowName, prefix) {
+		if strings.HasSuffix(windowName, suffix) {
 			return windowID, nil
 		}
 	}

@@ -577,7 +577,7 @@ fi
 echo
 echo "Press any key to close..."
 read -n 1 -s
-'`, settings.BinDir, cmd, windowName, settings.TaskrunnerIconSuccess, windowName, settings.TaskrunnerIconFailed)
+'`, settings.BinDir, cmd, settings.TaskrunnerIconSuccess, windowName, settings.TaskrunnerIconFailed, windowName)
 }
 
 func runMenu(registry *items.Registry, tmuxClient *tmux.Client, currentMenu string) {

@@ -2,6 +2,16 @@
 
 All notable changes to nunchux will be documented in this file.
 
+## [3.1.2]
+
+### Taskrunner Window Names
+
+Tmux window names for taskrunner tasks now lead with the status icon and drop the runner prefix.
+
+Before: `just » build ▶`, `just » build ✓`, `just » build ✗`
+
+After: `▶ build`, `✓ build`, `✗ build`
+
 ## [3.1.1]
 
 ### Switcher Configuration
