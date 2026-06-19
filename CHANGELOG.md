@@ -2,6 +2,18 @@
 
 All notable changes to nunchux will be documented in this file.
 
+## [3.1.3]
+
+### Cold-Boot Hang Fix
+
+Fixed a bug where nunchux would hang for many seconds on the first launch after a system boot when an app's `status` command (e.g. `docker ps`) blocked waiting on a daemon that hadn't finished starting. The context timeout already fired, but the spawned bash's child process kept the stdout pipe open, leaving `cmd.Output()` waiting on EOF.
+
+Status commands and taskrunner provider scripts now use `cmd.WaitDelay` to force-close pipes shortly after their context timeout, capping the worst-case wait.
+
+### Timeout Indicator
+
+When an app's `status` command times out, the menu line now shows `(timed out)` next to the app name instead of going blank, so it's clear which command failed.
+
 ## [3.1.2]
 
 ### Taskrunner Window Names

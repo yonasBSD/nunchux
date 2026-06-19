@@ -2,6 +2,7 @@ package items
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -82,6 +83,9 @@ func (a *AppItem) getStatus(ctx context.Context) string {
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, "bash", "-c", statusCmd)
+	// Force pipes to close shortly after timeout so a hung child (e.g. `docker ps`
+	// when the daemon is starting) can't keep us blocked on cmd.Output()'s pipe.
+	cmd.WaitDelay = 100 * time.Millisecond
 
 	// Add bin directory to PATH for helper scripts (lines, ago, nearest)
 	if a.Settings.BinDir != "" {
@@ -90,6 +94,9 @@ func (a *AppItem) getStatus(ctx context.Context) string {
 
 	output, err := cmd.Output()
 	if err != nil {
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			return "(timed out)"
+		}
 		return ""
 	}
 

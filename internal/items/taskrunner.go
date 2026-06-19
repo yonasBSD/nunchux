@@ -243,6 +243,7 @@ func getProviderValue(ctx context.Context, scriptPath, funcName string) string {
 
 	script := fmt.Sprintf("source %q && %s 2>/dev/null", scriptPath, funcName)
 	cmd := exec.CommandContext(ctx, "bash", "-c", script)
+	cmd.WaitDelay = 100 * time.Millisecond
 	output, err := cmd.Output()
 	if err != nil {
 		return ""
@@ -260,6 +261,7 @@ func getProviderTasks(ctx context.Context, scriptPath string) ([]TaskrunnerTask,
 
 	script := fmt.Sprintf("cd %q 2>/dev/null; source %q && plugin_items 2>/dev/null", paneDir, scriptPath)
 	cmd := exec.CommandContext(ctx, "bash", "-c", script)
+	cmd.WaitDelay = 100 * time.Millisecond
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
